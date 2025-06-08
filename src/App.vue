@@ -16,7 +16,9 @@ export default {
   components: {
     UnLoggedInLayout
   },
-  created() {},
+  created() {
+    this.$store.dispatch('login/checkLogin');
+  },
   methods: {},
 };
 </script>

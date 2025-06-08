@@ -1,11 +1,15 @@
 <template>
     <div class="form">
         <div class="form__header">
-            <h2 class="form__title">Lütfen Giriş Yapınız</h2>
+            <h2 class="form__title">Yeni Hesap Oluştur</h2>
             <h4 class="form__subTitle">Lütfen bilgilerinizi giriniz.</h4>
-            <router-link to="/register" class="form__headerBtn">Hesabın Yok Mu ?</router-link>
+            <router-link to="/login" class="form__headerBtn">Zaten Üye Misin ?</router-link>
         </div>
         <div class="form__body">
+            <div class="form__group">
+                <label class="form__inputTitle">Ad Soyad*</label>
+                <input v-model="displayName" type="text" class="form__input" placeholder="Ad Soyad">
+            </div>
             <div class="form__group">
                 <label class="form__inputTitle">Email*</label>
                 <input v-model="email" type="text" class="form__input" placeholder="example@example.com">
@@ -14,19 +18,9 @@
                 <label class="form__inputTitle">Şifre*</label>
                 <input v-model="password" type="password" class="form__input" placeholder="*******">
             </div>
-            <div class="form__actions">
-                <div class="form__action">
-                    <input type="checkbox" class="form__checkBox">
-                    <label class="form__inputTitle">Beni hatırla</label>
-                </div>
-                <div class="form__action">
-                    <label class="form__inputTitle">Şifremi unuttum</label>
-                    <a href="/" class="form__link">Sıfırla</a>
-                </div>
-            </div>
         </div>
         <div class="form__footer">
-            <button :class="{ '-disabled': !formValid }" class="form__btn" @click="login()">Giriş Yap</button>
+            <button :class="{ '-disabled': !formValid }" class="form__btn" @click="register()">Kayıt Ol</button>
         </div>
     </div>
 </template>
@@ -34,9 +28,10 @@
 <script>
 
 export default {
-    name: "login-form",
+    name: "register-form",
     data() {
         return {
+            displayName: '',
             email: '',
             password: '',
             formValid: false
@@ -44,19 +39,20 @@ export default {
     },
     watch: {
         email: 'validateForm',
-        password: 'validateForm'
+        password: 'validateForm',
+        disyplayName: 'validateForm'
     },
     components: {},
-    created() { },
+    created() {},
     methods: {
         validateForm() {
-            this.formValid = this.email.trim() !== '' && this.password.trim() !== ''
+            this.formValid = this.email.trim() !== '' && this.password.trim() !== '' && this.displayName.trim() !== ''
         },
-        login() {
+        register() {
             if (!this.formValid) {
                 return
             }
-            this.$store.dispatch('login/login', { email: this.email, password: this.password });
+            this.$store.dispatch('register/register', { email: this.email, password: this.password, displayName: this.displayName });
         }
     },
 };
@@ -74,18 +70,6 @@ export default {
         text-align: center;
     }
 
-    &__title {
-        font-size: 30px;
-        line-height: 40px;
-        margin-bottom: 15px;
-    }
-
-    &__subTitle {
-        font-size: 16px;
-        line-height: 24px;
-        margin-bottom: 33px;
-    }
-
     &__headerBtn {
         cursor: pointer;
         font-size: 16px;
@@ -101,8 +85,20 @@ export default {
         text-decoration: none;
     }
 
+    &__title {
+        font-size: 30px;
+        line-height: 40px;
+        margin-bottom: 15px;
+    }
+
+    &__subTitle {
+        font-size: 16px;
+        line-height: 24px;
+        margin-bottom: 33px;
+    }
+
     &__body {
-         margin-top: 30px;
+        margin-top: 30px;
         padding-top: 30px;
         border-top: 2px solid #21234B;
     }

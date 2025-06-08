@@ -1,13 +1,13 @@
 <template>
   <div>
-    <router-view />
+    main page
   </div>
 </template>
 
 <script>
 
 export default {
-  name: "App",
+  name: "main-layout",
   data() {
     return {}
   },

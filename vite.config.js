@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0'
   },
-  base: '/coin-actions/',
+  base: '/',
   css: {
     preprocessorOptions: {
 /*       scss: {

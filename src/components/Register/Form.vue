@@ -8,7 +8,7 @@
         <div class="form__body">
             <div class="form__group">
                 <label class="form__inputTitle">Ad Soyad*</label>
-                <input v-model="disyplayName" type="text" class="form__input" placeholder="Ad Soyad">
+                <input v-model="displayName" type="text" class="form__input" placeholder="Ad Soyad">
             </div>
             <div class="form__group">
                 <label class="form__inputTitle">Email*</label>
@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="form__footer">
-            <button :class="{ '-disabled': !formValid }" class="form__btn" @click="login()">Kayıt Ol</button>
+            <button :class="{ '-disabled': !formValid }" class="form__btn" @click="register()">Kayıt Ol</button>
         </div>
     </div>
 </template>
@@ -31,7 +31,7 @@ export default {
     name: "register-form",
     data() {
         return {
-            disyplayName: '',
+            displayName: '',
             email: '',
             password: '',
             formValid: false
@@ -46,13 +46,13 @@ export default {
     created() {},
     methods: {
         validateForm() {
-            this.formValid = this.email.trim() !== '' && this.password.trim() !== '' && this.disyplayName.trim() !== ''
+            this.formValid = this.email.trim() !== '' && this.password.trim() !== '' && this.displayName.trim() !== ''
         },
-        login() {
+        register() {
             if (!this.formValid) {
                 return
             }
-            //this.$store.dispatch('login/login', { email: this.email, password: this.password });
+            this.$store.dispatch('register/register', { email: this.email, password: this.password, displayName: this.displayName });
         }
     },
 };

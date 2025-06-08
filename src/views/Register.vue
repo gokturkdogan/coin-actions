@@ -10,7 +10,9 @@
 import Form from '../components/Register/Form.vue';
 export default {
   name: "register",
-  data() {},
+  data() {
+    return {}
+  },
   components: {
     Form
   },

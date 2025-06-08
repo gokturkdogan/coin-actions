@@ -10,7 +10,9 @@
 import Form from '../components/Login/Form.vue';
 export default {
   name: "login",
-  data() {},
+  data() {
+    return {}
+  },
   components: {
     Form
   },

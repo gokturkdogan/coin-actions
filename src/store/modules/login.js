@@ -22,7 +22,7 @@ const login = {
     }
   },
   actions: {
-    async login({ commit }, { email, password }) {
+    async login({ commit, dispatch }, { email, password }) {
       commit('SET_LOGIN_INFO', { email, password });
       commit('SET_IS_LOGIN', false);
       try {
@@ -30,15 +30,23 @@ const login = {
         const user = userCredential.user;
         if (!user.emailVerified) {
           await signOut(auth);
-          console.log('Lütfen önce e-posta adresinizi doğrulayın.');
-          throw new Error("Lütfen önce e-posta adresinizi doğrulayın.");
+          dispatch('notify/openNotify', { type: 'warning', message: 'Lütfen önce e-posta adresinizi doğrulayın.' }, { root: true });
+          return
         }
         commit('SET_USER', user);
         commit('SET_IS_LOGIN', true);
         router.push({ name: 'Home' });
       } catch (error) {
+        let errMsg = '';
+        if (error.message === 'Firebase: Error (auth/invalid-email).') {
+          errMsg = 'Geçersiz E-posta, Lütfen Kontrol Edip Tekrar Deneyiniz'
+        } else if (error.message === 'Firebase: Error (auth/invalid-credential).') {
+          errMsg = 'Giriş Bilgilerinizi Kontrol Edip Tekrar Deneyiniz'
+        } else {
+          errMsg = 'Bir Hata Oluştu Lütfen Daha Sonra Tekrar Deneyin'
+        }
         commit('SET_IS_LOGIN', false);
-        console.error('Login failed:', error);
+        dispatch('notify/openNotify', { type: 'error', message: errMsg }, { root: true });
         throw error;
       }
     },

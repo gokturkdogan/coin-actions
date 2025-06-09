@@ -16,7 +16,7 @@ const notify = {
             await commit('SET_NOTIFY', { type: payload.type, message: payload.message, isShow: true });
             setTimeout(() => {
                 dispatch('closeNotify')
-              }, 3000);
+              }, 4000);
         },
         closeNotify({ commit }) {
             commit('SET_NOTIFY', { type: '', message: '', isShow: false });

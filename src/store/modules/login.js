@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail  } from 'firebase/auth'
 import { auth } from '@/config/firebase'
 import router from '@/router';
 
@@ -33,7 +33,6 @@ const login = {
           console.log('Lütfen önce e-posta adresinizi doğrulayın.');
           throw new Error("Lütfen önce e-posta adresinizi doğrulayın.");
         }
-
         commit('SET_USER', user);
         commit('SET_IS_LOGIN', true);
         router.push({ name: 'Home' });
@@ -43,7 +42,6 @@ const login = {
         throw error;
       }
     },
-
     async logout({ commit }) {
       try {
         await signOut(auth);
@@ -53,7 +51,6 @@ const login = {
         throw error;
       }
     },
-
     checkLogin({ commit }) {
       return new Promise((resolve) => {
         onAuthStateChanged(auth, async (user) => {
@@ -69,6 +66,14 @@ const login = {
           }
         });
       });
+    },
+    async reset(_, email) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+      } catch (error) {
+        console.error('Şifre sıfırlama başarısız:', error);
+        throw error;
+      }
     }
   },
   getters: {

@@ -16,8 +16,7 @@
             </div>
             <div class="form__actions">
                 <div class="form__action">
-                    <input type="checkbox" class="form__checkBox">
-                    <label class="form__inputTitle">Beni hatırla</label>
+                    <button @click="resetForm()" class="form__reset">Formu Sıfırla</button>
                 </div>
                 <div class="form__action">
                     <label class="form__inputTitle">Şifremi unuttum</label>
@@ -52,11 +51,15 @@ export default {
         validateForm() {
             this.formValid = this.email.trim() !== '' && this.password.trim() !== ''
         },
-        login() {
+        async login() {
             if (!this.formValid) {
                 return
             }
             this.$store.dispatch('login/login', { email: this.email, password: this.password });
+        },
+        resetForm() {
+            this.email = '';
+            this.password = ''
         }
     },
 };
@@ -161,6 +164,21 @@ export default {
 
         &:hover {
             color: #7130C3;
+        }
+    }
+
+    &__reset {
+        background: none;
+        outline: none;
+        border: none;
+        color: #FFFFFF;
+        font-size: 16px;
+        transition: 0.3s;
+        cursor: pointer;
+
+        &:hover {
+            color: #FF3BD4;
+            text-decoration: underline;
         }
     }
 

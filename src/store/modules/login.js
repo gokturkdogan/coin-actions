@@ -75,11 +75,12 @@ const login = {
         });
       });
     },
-    async reset(_, email) {
+    async reset({ dispatch }, email) {
       try {
         await sendPasswordResetEmail(auth, email);
+        dispatch('notify/openNotify', { type: 'success', message: 'Parola Sıfırlama Bağlantısı E postanıza Gönderildi, Lütfen Spam Kutunuzu Kontrol Edin' }, { root: true });
       } catch (error) {
-        console.error('Şifre sıfırlama başarısız:', error);
+         dispatch('notify/openNotify', { type: 'warning', message: 'Geçersiz E-posta, Lütfen Kontrol Edip Tekrar Deneyiniz' }, { root: true });
         throw error;
       }
     }

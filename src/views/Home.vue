@@ -29,7 +29,12 @@ export default {
     Modal,
     Advantages
   },
-  created() {},
+  created() {
+    this.$store.dispatch('coins/connectWebSocketForHome');
+  },
+  beforeUnmount() {
+    this.$store.dispatch('coins/disconnectWebSocketForHome');
+  },
   methods: {
     openModal() {
       this.isModalShow = true;

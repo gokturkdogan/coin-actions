@@ -13,28 +13,26 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td class="list__number">1</td>
-                    <td class="list__name">Bitcoin</td>
-                    <td class="list__price">$109,220.07</td>
-                    <td class="list__change">
-                        <div><i></i>3.13%</div>
+                <tr v-for="(coin, index) in coins" :key="index">
+                    <td class="list__number">{{ index + 1 }}</td>
+                    <td class="list__name">
+                        <span class="list__symbol">
+                            <img class="list__img" :src="coin.logoUrl" alt="">{{ coin.symbol }}
+                        </span>
                     </td>
-                </tr>
-                <tr>
-                    <td class="list__number">2</td>
-                    <td class="list__name">Ethereum</td>
-                    <td class="list__price">$2,680.16</td>
-                    <td class="list__change">
-                        <div><i></i>3.13%</div>
+                    <td class="list__price">
+                        <span class="list__currency">
+                            <DollarIcon />{{ coin.lastPrice }}
+                        </span>
                     </td>
-                </tr>
-                <tr>
-                    <td class="list__number">3</td>
-                    <td class="list__name">BNB</td>
-                    <td class="list__price">$658.82</td>
                     <td class="list__change">
-                        <div><i></i>3.13%</div>
+                        <span class="list__span">
+                            <span class="list__colored" :class="{ '-up': coin.priceChangePercent > 0, '-down':  coin.priceChangePercent < 0 }">
+                                <ArrowUp v-if="coin.priceChangePercent > 0"/>
+                                <ArrowDown v-else/>
+                                {{ coin.priceChangePercent }}
+                            </span>
+                        </span>
                     </td>
                 </tr>
             </tbody>
@@ -47,18 +45,29 @@
 
 <script>
 import Modal from './Modal.vue';
+import DollarIcon from '../../assets/images/icons/dollar-icon.vue';
+import ArrowUp from '../../assets/images/icons/arrow-up-icon.vue';
+import ArrowDown from '../../assets/images/icons/arrow-down-icon.vue';
 export default {
     name: "home-list",
     data() {
         return {}
     },
     components: {
-        Modal
+        Modal,
+        DollarIcon,
+        ArrowUp,
+        ArrowDown
     },
     created() { },
     methods: {
         showCoins() {
             this.$emit('open-modal');
+        }
+    },
+    computed: {
+        coins() {
+            return this.$store.getters['coins/coinsData'];
         }
     }
 };
@@ -150,6 +159,21 @@ export default {
         text-align: left;
     }
 
+    &__symbol {
+        display: flex;
+    }
+
+    &__currency {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    &__img {
+        width: 20px;
+        margin-right: 10px;
+    }
+
     &__price {
         width: 200px;
         text-align: right;
@@ -158,6 +182,33 @@ export default {
     &__change {
         width: 100px;
         text-align: right;
+    }
+
+    &__span {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+    }
+
+    &__colored {
+        height: 30px;
+        display: flex;
+        align-items: center;
+        padding: 0 7px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+
+        &.-up {
+            background: rgba(52, 179, 73, 0.1);
+            color: #6ccf59;
+        }
+
+        &.-down {
+            background-color: rgba(240, 41, 52, .1);
+            color: #ff4d4d;
+        }
     }
 
     &__buttonArea {

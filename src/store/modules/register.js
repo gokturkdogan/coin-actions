@@ -1,5 +1,6 @@
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification  } from 'firebase/auth';
-import { auth } from '@/config/firebase';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
+import { auth, db } from '@/config/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 const register = {
   namespaced: true,
@@ -9,9 +10,17 @@ const register = {
     async register({ commit }, { email, password, displayName }) {
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        //burda araya girerek update methodunu 3 saniye geicktirip notify componenti ile başarı ile kayıto lundu gibi bir mesaj bastırabiliriz
-        await updateProfile(userCredential.user, { displayName });
-        await sendEmailVerification(userCredential.user);
+        const user = userCredential.user;
+
+        await updateProfile(user, { displayName });
+        await sendEmailVerification(user);
+        await setDoc(doc(db, 'users', user.uid), {
+          email: email,
+          displayName: displayName,
+          isPremium: false, 
+          createdAt: new Date()
+        });
+
       } catch (error) {
         console.error('Register failed:', error);
         throw error;

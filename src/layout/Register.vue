@@ -1,19 +1,18 @@
 <template>
   <div>
-    <router-view />
-    <Notify />
+    <Register />
   </div>
 </template>
 
 <script>
-import Notify from './components/Base/Notify.vue'
+import Register from '../views/Register.vue'
 export default {
-  name: "App",
+  name: "register-layout",
   data() {
     return {}
   },
   components: {
-    Notify
+    Register
   },
   created() {},
   methods: {},

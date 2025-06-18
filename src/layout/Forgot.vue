@@ -1,19 +1,18 @@
 <template>
   <div>
-    <router-view />
-    <Notify />
+    <Forgot />
   </div>
 </template>
 
 <script>
-import Notify from './components/Base/Notify.vue'
+import Forgot from '../views/Forgot.vue'
 export default {
-  name: "App",
+  name: "forgot-layout",
   data() {
     return {}
   },
   components: {
-    Notify
+    Forgot
   },
   created() {},
   methods: {},

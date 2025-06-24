@@ -3,13 +3,14 @@ import store from '@/store'
 import Home from '@/layout/Main.vue'
 import Login from '@/layout/Login.vue'
 import Register from '@/layout/Register.vue'
+import Forgot from '@/layout/Forgot.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',
@@ -21,6 +22,12 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register,
+    meta: { guestOnly: true }
+  },
+  {
+    path: '/reset-password',
+    name: 'Forgot',
+    component: Forgot,
     meta: { guestOnly: true }
   }
 ]

@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import Form from '../components/Login/Form.vue';
+import Form from '../components/Forgot/Form.vue';
 export default {
-  name: "login",
+  name: "forgot",
   data() {
     return {}
   },

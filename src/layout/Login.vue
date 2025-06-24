@@ -7,8 +7,10 @@
 <script>
 import Login from '../views/Login.vue'
 export default {
-  name: "un-logged-in-layout",
-  data() {},
+  name: "login-layout",
+  data() {
+    return {}
+  },
   components: {
     Login
   },

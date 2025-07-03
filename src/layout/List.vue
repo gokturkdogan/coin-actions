@@ -1,26 +1,25 @@
 <template>
   <div class="main">
     <TheHeader :current-route="currentRoute"/>
-    <Home />
+    <List />
     <TheFooter />
   </div>
 </template>
 
 <script>
 import TheHeader from '../components/Base/TheHeader.vue'
-import Home from '../views/Home.vue'
+import List from '../views/List.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
 export default {
-  name: "main-layout",
+  name: "main-list",
   data() {
     return {}
   },
   components: {
     TheHeader,
-    Home,
+    List,
     TheFooter
   },
-  created() { },
   methods: {},
   computed: {
     currentRoute() {

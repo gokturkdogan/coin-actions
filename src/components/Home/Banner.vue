@@ -2,7 +2,7 @@
     <div class="banner">
         <div class="banner__text">COIN ACTIONS İle Takipte Kalın</div>
         <div class="banner__buttons">
-            <router-link to="/login" class="banner__button">Hemen Premium Al</router-link>
+            <router-link to="/" class="banner__button">Hemen Premium Al</router-link>
             <span @click="showCoins()" class="banner__button">Tüm Coinler</span>
         </div>
     </div>
@@ -19,7 +19,8 @@ export default {
     created() {},
     methods: {
         showCoins() {
-            this.$emit('open-modal')
+            this.$router.push({ name: 'Coins' });
+            //this.$emit('open-modal')
         }
     },
 };
@@ -29,7 +30,6 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 150px;
 
     &__text {
         color: #CCCEEF;

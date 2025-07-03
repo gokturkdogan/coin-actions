@@ -4,6 +4,7 @@ import Home from '@/layout/Main.vue'
 import Login from '@/layout/Login.vue'
 import Register from '@/layout/Register.vue'
 import Forgot from '@/layout/Forgot.vue'
+import Coins from '@/layout/List.vue'
 
 const routes = [
   {
@@ -29,6 +30,12 @@ const routes = [
     name: 'Forgot',
     component: Forgot,
     meta: { guestOnly: true }
+  },
+  {
+    path: '/coin-list',
+    name: 'Coins',
+    component: Coins,
+    meta: { requiresAuth: false }
   }
 ]
 

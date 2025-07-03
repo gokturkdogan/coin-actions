@@ -19,7 +19,7 @@
             </div>
             <div class="footer__premium">
                 <h4 class="footer__title">ARAMIZA KATIL</h4>
-                <router-link class="footer__button" to="/login">Premium Ol</router-link>
+                <router-link class="footer__button" to="/">Premium Ol</router-link>
             </div>
         </div>
         <span class="footer__copyrights">Copyright© 2025 CoinActions. All rights reserved.</span>
@@ -41,7 +41,7 @@ export default {
 
 <style lang="scss" scoped>
 .footer {
-    padding: 0 500px 100px 500px;
+    padding: 0 300px 100px 300px;
     display: flex;
     flex-direction: column;
     justify-content: center;

@@ -5,8 +5,7 @@
         <div class="header__nav">
           <router-link to="/" class="header__link" :class="{ '-active': currentRoute === 'Home' }">ANASAYFA</router-link>
           <router-link to="/coin-list" class="header__link" :class="{ '-active': currentRoute === 'Coins' }">COİN LİSTESİ</router-link>
-          <!--<router-link to="/login" class="header__link">ÜYELİK PLANLARI</router-link>
-          <router-link to="/login" class="header__link">HESABIM</router-link> -->
+          <router-link to="/orders" class="header__link" :class="{ '-active': currentRoute === 'Orders' }">EMİR TAKİBİ</router-link>
         </div>
         <!-- <router-link to="/login" class="header__button">Giriş Yap</router-link> -->
     </div>

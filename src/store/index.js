@@ -4,6 +4,7 @@ import register from './modules/register';
 import notify from './modules/notify';
 import coins from './modules/coins';
 import coinDetail from './modules/coinDetail';
+import orderList from './modules/orderList';
 
 export default createStore({
   modules: {
@@ -11,6 +12,7 @@ export default createStore({
     register,
     notify,
     coins,
-    coinDetail
+    coinDetail,
+    orderList
   },
 });

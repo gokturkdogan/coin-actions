@@ -6,6 +6,7 @@ import Register from '@/layout/Register.vue'
 import Forgot from '@/layout/Forgot.vue'
 import Coins from '@/layout/List.vue'
 import Detail from '@/layout/Detail.vue'
+import Orders from '@/layout/Orders.vue'
 
 const routes = [
   {
@@ -43,6 +44,12 @@ const routes = [
     name: 'CoinDetail',
     component: Detail,
     props: true,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/orders',
+    name: 'Orders',
+    component: Orders,
     meta: { requiresAuth: false }
   }
 ]

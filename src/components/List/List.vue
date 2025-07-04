@@ -30,7 +30,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" v-for="(coin, index) in coins" :key="index" :class="coin.changeClass">
+                <tr class="list__item" v-for="(coin, index) in coins" :key="index" :class="coin.changeClass" @click="goDetail(coin)">
                     <td class="list__number">{{ index + 1 }}</td>
                     <td class="list__name">
                         <span class="list__symbol">
@@ -92,6 +92,10 @@ export default {
     methods: {
         order(tab) {
             this.$store.dispatch('coins/setOrderBy', { type: tab.type, isUp: !tab.isUp });
+        },
+        async goDetail(coin) {
+            await this.$store.dispatch('coinDetail/openCoinDetail', coin.symbol);
+            this.$router.push({ name: 'CoinDetail', params: { symbol: coin.symbol } });
         }
     },
     computed: {

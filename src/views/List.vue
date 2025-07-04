@@ -2,7 +2,7 @@
   <div class="list">
     <img class="list__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="list__section">
-      <List @open-modal="openModal"/>
+      <List/>
     </div>
     <img class="list__divider" src="../assets/images/backgorunds/divider.svg" alt="">
   </div>

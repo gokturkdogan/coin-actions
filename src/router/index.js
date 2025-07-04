@@ -5,6 +5,7 @@ import Login from '@/layout/Login.vue'
 import Register from '@/layout/Register.vue'
 import Forgot from '@/layout/Forgot.vue'
 import Coins from '@/layout/List.vue'
+import Detail from '@/layout/Detail.vue'
 
 const routes = [
   {
@@ -35,6 +36,13 @@ const routes = [
     path: '/coin-list',
     name: 'Coins',
     component: Coins,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/coin-detail/:symbol',
+    name: 'CoinDetail',
+    component: Detail,
+    props: true,
     meta: { requiresAuth: false }
   }
 ]

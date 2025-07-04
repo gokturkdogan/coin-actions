@@ -9,7 +9,7 @@
             <div class="orders__item --buy" v-for="(bid, index) in depthData.bids" :key="index">
                 <div class="orders__text --price --buy">{{ formatNumber(bid[0], 4) }}</div>
                 <div class="orders__text">{{ formatNumber(bid[1], 4) }}</div>
-                <div class="orders__text">$ {{ formatNumber(bid[0] * bid[1], 4) }}</div>
+                <div class="orders__text --amount">$ {{ formatNumber(bid[0] * bid[1], 4) }}</div>
             </div>
         </div>
         <div class="orders__price">
@@ -96,8 +96,8 @@ export default {
             display: flex;
             padding: 5px 10px;
             gap: 20px;
-            cursor: pointer;
             justify-content: space-between;
+            cursor: pointer;
             &.--buy {
                 &:hover {
                     background-color: rgba(1, 167, 128, 0.271);
@@ -108,9 +108,13 @@ export default {
                     background-color: rgba(207, 48, 75, 0.271);
                 }
             }
+            &.--amount {
+                text-align: right;
+            }
         }
 
         &__text {
+            min-width: 80px;
             &.--price {
                 &.--buy {
                     color: rgb(1, 167, 129);

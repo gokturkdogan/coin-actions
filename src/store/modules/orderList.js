@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 const orderList = {
   namespaced: true,
   state: () => ({
@@ -29,7 +27,7 @@ const orderList = {
   },
 
   actions: {
-    initOrderList({ commit, dispatch }) {
+    async initOrderList({ commit, dispatch }) {
       commit('clearSockets');
       commit('clearOrders');
       const coins = [
@@ -38,20 +36,24 @@ const orderList = {
         'LTC', 'SHIB', 'LINK', 'BCH', 'XLM',
         'NEAR', 'FIL', 'ATOM', 'APT', 'ICP'
       ];
-      const initialCoins = coins.slice(0, 5);
-      const delayedCoins = coins.slice(5);
-      initialCoins.forEach(symbol => {
+      await dispatch('connectTradeSocket', 'BTC');
+      await dispatch('connectTickerSocket', 'BTC');
+      const delayedCoins = coins.filter(c => c !== 'BTC');
+      for (let i = 0; i < delayedCoins.length; i++) {
+        const symbol = delayedCoins[i];
+        await new Promise(resolve => setTimeout(resolve, 500));
         dispatch('connectTradeSocket', symbol);
         dispatch('connectTickerSocket', symbol);
-      });
-      setTimeout(() => {
-        delayedCoins.forEach((symbol, index) => {
-          setTimeout(() => {
-            dispatch('connectTradeSocket', symbol);
-            dispatch('connectTickerSocket', symbol);
-          }, index * 300);
-        });
-      }, 2000);
+        console.log('açıldı', symbol);
+      }
+    },
+    watchCoin({ commit, dispatch }, symbol) {
+      const upper = symbol.toUpperCase();
+      if (!upper) return;
+      commit('clearSockets');
+      commit('clearOrders');
+      dispatch('connectTradeSocket', upper);
+      dispatch('connectTickerSocket', upper);
     },
     connectTradeSocket({ commit, state }, symbol) {
       const pair = symbol.toLowerCase() + 'usdt';
@@ -64,9 +66,9 @@ const orderList = {
         const ticker = state.tickers[symbol] || {};
         const order = {
           symbol: symbol.toUpperCase(),
-          price: price.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
-          qty: qty.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
-          total: total.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
+          price: price.toFixed(4),
+          qty: qty.toFixed(4),
+          total: total.toFixed(4),
           usdValue: total,
           type: data.m ? 'sell' : 'buy',
           lastPrice: ticker.lastPrice || null,

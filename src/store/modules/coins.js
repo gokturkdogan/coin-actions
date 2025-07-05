@@ -5,17 +5,19 @@ const coins = {
   state: () => ({
     coinsData: [],
     socket: null,
+    futuresSocket: null,
     logos: {},
     previousPrices: {},
     coinsDataList: [],
     socketList: null,
     logosList: {},
     previousPricesList: {},
+    futuresDataMap: {},
     orders: [
       { text: 'Varsayılan', type: 'default', isUp: false, isActive: true },
       { text: 'Fiyat', type: 'lastPrice', isUp: false, isActive: false },
-      { text: 'Toplam Hacim', type: 'totalQuoteVolume', isUp: false, isActive: false },
-      { text: '24s Hacim', type: 'totalVolume', isUp: false, isActive: false },
+      { text: 'Spot Hacim', type: 'totalQuoteVolume', isUp: false, isActive: false },
+      { text: 'Vadeli Hacim', type: 'futuresQuoteVolume', isUp: false, isActive: false },
       { text: '24s Değişim', type: 'priceChangePercent', isUp: false, isActive: false }
     ],
   }),
@@ -29,6 +31,9 @@ const coins = {
     },
     setSocket(state, socket) {
       state.socket = socket;
+    },
+    setFuturesSocket(state, socket) {
+      state.futuresSocket = socket;
     },
     setLogos(state, logos) {
       state.logos = logos;
@@ -44,6 +49,9 @@ const coins = {
     },
     setLogosList(state, logos) {
       state.logosList = logos;
+    },
+    setFuturesDataMap(state, dataMap) {
+      state.futuresDataMap = dataMap;
     },
     setOrders(state, payload) {
       state.orders = payload;
@@ -165,6 +173,7 @@ const coins = {
     async connectWebSocketForList({ commit, state, dispatch }) {
       if (state.socketList) return;
       await dispatch('fetchLogosForList');
+      await dispatch('connectFuturesWebSocket'); // Vadeli socketi bağla
       const socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
       socket.onmessage = (event) => {
         const rawData = JSON.parse(event.data);
@@ -188,20 +197,24 @@ const coins = {
             if (newPriceNum > prevPrice) changeClass = '-up';
             else if (newPriceNum < prevPrice) changeClass = '-down';
           }
+          const futuresData = state.futuresDataMap[item.s] || {};
           currentCoinsMap[symbol] = {
             symbol,
             lastPrice: formattedPrice,
             priceChangePercent: Number(item.P).toFixed(2),
             logoUrl: logos[item.s] || '',
             changeClass,
-            totalVolume: Number(item.v).toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            }),
+            totalVolume: Number(item.v).toFixed(5), // Spot coin cinsinden hacim
             totalQuoteVolume: Number(item.q).toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
-            }),
+            }), // Spot USD hacim
+            futuresVolume: futuresData.futuresVolume
+              ? Number(futuresData.futuresVolume).toFixed(3)
+              : '0.00000', // Vadeli coin hacim
+            futuresQuoteVolume: futuresData.futuresQuoteVolume
+              ? Number(futuresData.futuresQuoteVolume).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : '0.00' // Vadeli USD hacim
           };
         });
         let combinedData = Object.values(currentCoinsMap);
@@ -244,6 +257,28 @@ const coins = {
         state.socketList.close();
         commit('setSocketList', null);
       }
+      if (state.futuresSocket) {
+        state.futuresSocket.close();
+        commit('setFuturesSocket', null);
+      }
+    },
+    connectFuturesWebSocket({ commit, state }) {
+      if (state.futuresSocket) return;
+      const socket = new WebSocket('wss://fstream.binance.com/ws/!ticker@arr');
+      socket.onmessage = (event) => {
+        const rawData = JSON.parse(event.data);
+        const futuresDataMap = { ...state.futuresDataMap };
+        rawData.forEach(item => {
+          futuresDataMap[item.s] = {
+            futuresVolume: Number(item.v),       // Coin cinsinden vadeli hacim
+            futuresQuoteVolume: Number(item.q),  // USD cinsinden vadeli hacim
+          };
+        });
+        commit('setFuturesDataMap', futuresDataMap);
+      };
+      socket.onerror = (err) => console.error('Futures socket error:', err);
+      socket.onclose = () => commit('setFuturesSocket', null);
+      commit('setFuturesSocket', socket);
     },
     setOrderBy({ state, commit }, { type, isUp }) {
       const updatedOrders = state.orders.map(order => {

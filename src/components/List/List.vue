@@ -2,7 +2,7 @@
     <div class="list">
         <div class="list__header">
             <div class="list__input" :class="{ '-focused': inputFocused }">
-                <input type="text" placeholder="Coin Ara" @focus="inputFocused=true" @blur="inputFocused=false">
+                <input type="text" placeholder="Coin Ara" @focus="inputFocused = true" @blur="inputFocused = false">
                 <Search />
             </div>
             <h2 class="list__title">TÜM COINLER</h2>
@@ -23,36 +23,52 @@
                 <tr>
                     <th class="list__number">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name">Fiyat</th>
-                    <th class="list__name">Toplam Hacim</th>
-                    <th class="list__price">24s Hacim</th>
-                    <th class="list__change">24s Değişim</th>
+                    <th class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">Fiyat</th>
+                    <th class="list__name">Spot Hacim (Adet)</th>
+                    <th class="list__price" :class="{ '-active': activeOrderType === 'totalQuoteVolume' }">Spot Hacim
+                        (Usd)</th>
+                    <th class="list__price">Vadeli Hacim (Adet)</th>
+                    <th class="list__price" :class="{ '-active': activeOrderType === 'futuresQuoteVolume' }">Vadeli
+                        Hacim (Usd)</th>
+                    <th class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">24s
+                        Değişim</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" v-for="(coin, index) in coins" :key="index" :class="coin.changeClass" @click="goDetail(coin)">
+                <tr class="list__item" v-for="(coin, index) in coins" :key="index" :class="coin.changeClass"
+                    @click="goDetail(coin)">
                     <td class="list__number">{{ index + 1 }}</td>
                     <td class="list__name">
                         <span class="list__symbol">
                             <img class="list__img" :src="coin.logoUrl" alt="">{{ coin.symbol }}
                         </span>
                     </td>
-                    <td class="list__name">
+                    <td :class="{ '-active': activeOrderType === 'lastPrice' }" class="list__name">
                         <span class="list__symbol">
                             <DollarIcon />{{ coin.lastPrice }}
                         </span>
                     </td>
                     <td class="list__name">
                         <span class="list__symbol">
+                            {{ coin.totalVolume }}({{ coin.symbol }})
+                        </span>
+                    </td>
+                    <td :class="{ '-active': activeOrderType === 'totalQuoteVolume' }" class="list__price">
+                        <span class="list__currency">
                             <DollarIcon />{{ coin.totalQuoteVolume }}
                         </span>
                     </td>
                     <td class="list__price">
                         <span class="list__currency">
-                            <DollarIcon />{{ coin.totalVolume }}
+                            {{ coin.futuresVolume }}({{ coin.symbol }})
                         </span>
                     </td>
-                    <td class="list__change">
+                    <td :class="{ '-active': activeOrderType === 'futuresQuoteVolume' }" class="list__price">
+                        <span class="list__currency">
+                            <DollarIcon />{{ coin.futuresQuoteVolume }}
+                        </span>
+                    </td>
+                    <td class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
                         <span class="list__span">
                             <span class="list__colored"
                                 :class="{ '-up': coin.priceChangePercent > 0, '-down': coin.priceChangePercent < 0 }">
@@ -104,6 +120,10 @@ export default {
         },
         orders() {
             return this.$store.getters['coins/orders'];
+        },
+        activeOrderType() {
+            const activeOrder = this.orders.find(order => order.isActive);
+            return activeOrder ? activeOrder.type : null;
         }
     }
 };
@@ -258,12 +278,18 @@ export default {
 
         th,
         td {
-            padding: 20px 40px;
+            padding: 20px 10px;
             border: none;
             outline: none;
+
+            &.-active {
+                box-shadow: 0 0 26px -5px #FF3BD4;
+            }
         }
 
         tbody {
+            color: #b9b9b9;
+
             tr {
                 cursor: pointer;
                 transition: 0.3s;
@@ -279,12 +305,12 @@ export default {
 
     &__item {
         &.-up {
-            background-color: rgba(0, 200, 0, 0.255);
+            background-color: rgba(0, 200, 0, 0.488);
             transition: background-color 1s ease;
         }
 
         &.-down {
-            background-color: rgba(200, 0, 0, 0.255);
+            background-color: rgba(200, 0, 0, 0.488);
             transition: background-color 1s ease;
         }
     }

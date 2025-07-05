@@ -166,6 +166,7 @@ const coinDetail = {
 
     closeCoinDetail({ commit }) {
       commit('clearSockets');
+      console.log('detail Socket kapandı')
     },
   },
 

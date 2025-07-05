@@ -1,29 +1,24 @@
 <template>
-  <div class="detail">
+  <div class="book">
     <TheHeader :current-route="currentRoute"/>
-    <Detail v-if="symbol" :symbol="symbol"/>
+    <Book />
     <TheFooter />
   </div>
 </template>
 
 <script>
 import TheHeader from '../components/Base/TheHeader.vue'
-import Detail from '../views/Detail.vue'
+import Book from '../views/Book.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
 export default {
-  name: "detail-layout",
+  name: "book-layout",
   data() {
     return {}
   },
   components: {
     TheHeader,
-    Detail,
+    Book,
     TheFooter
-  },
-  props: {
-    symbol: {
-      type: String
-    }
   },
   created() { },
   methods: {},
@@ -35,7 +30,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.detail {
+.book {
   background-color: #080713;
   min-height: 100vh;
 }

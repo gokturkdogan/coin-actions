@@ -7,6 +7,7 @@ import Forgot from '@/layout/Forgot.vue'
 import Coins from '@/layout/List.vue'
 import Detail from '@/layout/Detail.vue'
 import Orders from '@/layout/Orders.vue'
+import Book from '@/layout/Book.vue'
 
 const routes = [
   {
@@ -50,6 +51,12 @@ const routes = [
     path: '/orders',
     name: 'Orders',
     component: Orders,
+    meta: { requiresAuth: false }
+  },
+    {
+    path: '/order-book',
+    name: 'Book',
+    component: Book,
     meta: { requiresAuth: false }
   }
 ]

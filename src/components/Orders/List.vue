@@ -1,91 +1,112 @@
 <template>
-    <div class="list">
-        <div class="list__header">
-            <h2 class="list__title">EMİR TAKİBİ</h2>
-        </div>
-        <table class="list__table">
-            <thead>
-                <tr>
-                    <th class="list__number">#</th>
-                    <th class="list__name">Coin</th>
-                    <th class="list__name">Emir Tutarı</th>
-                    <th class="list__name">Miktar</th>
-                    <th class="list__change">Fiyat</th>                    
-                    <th class="list__change">24s %</th>
-                    <th class="list__change">Hacim 24s</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="list__item" v-for="(order, index) in orders" :key="index" :class="{ '-up': order.type === 'buy', '-down': order.type === 'sell' }">
-                    <td class="list__number">{{ index + 1 }}</td>
-                    <td class="list__name">
-                        <span class="list__symbol">
-                            {{ order.symbol }}
-                        </span>
-                    </td>
-                    <td class="list__name">
-                        <span class="list__symbol -colored" :class="{ '-buy': order.type === 'buy', '-sell': order.type === 'sell' }">
-                            ${{ formatNumber(order.usdValue, 2) }}
-                        </span>
-                    </td>
-                    <td class="list__name">
-                        <span class="list__symbol -colored" :class="{ '-buy': order.type === 'buy', '-sell': order.type === 'sell' }">
-                            {{ order.qty }}
-                        </span>
-                    </td>
-                    <td class="list__change">
-                        <span class="list__currency">
-                            {{ formatNumber(order.lastPrice, 4) }}
-                        </span>
-                    </td>                    
-                    <td class="list__change">
-                        <span class="list__span">
-                            <span class="list__colored" :class="{ '-up': order.changePercent > 0, '-down':  order.changePercent < 0 }">
-                                <ArrowUp v-if="order.changePercent > 0"/>
-                                <ArrowDown v-else/>
-                                {{ order.changePercent }}
-                            </span>
-                        </span>
-                    </td>
-                    <td class="list__change">
-                        <span class="list__currency">
-                            ${{ formatNumber(order.volume24h, 3) }}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+  <div class="list">
+    <div class="list__header">            
+      <div class="list__input" :class="{ '-focused': inputFocused || searchText }">
+        <input
+          type="text"
+          v-model="searchText"
+          placeholder="Coin Ara"
+          @focus="inputFocused = true"
+          @blur="inputFocused = false"
+          @input="onSearchInput"
+        />
+        <Search />
+      </div>
+      <h2 class="list__title">EMİR TAKİBİ</h2>
     </div>
+
+    <table class="list__table">
+      <thead>
+        <tr>
+          <th class="list__number">#</th>
+          <th class="list__name">Coin</th>
+          <th class="list__name">Emir Tutarı</th>
+          <th class="list__name">Miktar</th>
+          <th class="list__change">Fiyat</th>                    
+          <th class="list__change">24s %</th>
+          <th class="list__change">Hacim 24s</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="list__item"
+          v-for="(order, index) in orders"
+          :key="index"
+          :class="{ '-up': order.type === 'buy', '-down': order.type === 'sell' }"
+        >
+          <td class="list__number">{{ index + 1 }}</td>
+          <td class="list__name"><span class="list__symbol">{{ order.symbol }}</span></td>
+          <td class="list__name">
+            <span class="list__symbol -colored" :class="{ '-buy': order.type === 'buy', '-sell': order.type === 'sell' }">
+              ${{ formatNumber(order.usdValue, 2) }}
+            </span>
+          </td>
+          <td class="list__name">
+            <span class="list__symbol -colored" :class="{ '-buy': order.type === 'buy', '-sell': order.type === 'sell' }">
+              {{ order.qty }}
+            </span>
+          </td>
+          <td class="list__change"><span class="list__currency">{{ formatNumber(order.lastPrice, 4) }}</span></td>
+          <td class="list__change">
+            <span class="list__span">
+              <span class="list__colored" :class="{ '-up': order.changePercent > 0, '-down': order.changePercent < 0 }">
+                <ArrowUp v-if="order.changePercent > 0"/>
+                <ArrowDown v-else/>
+                {{ order.changePercent }}
+              </span>
+            </span>
+          </td>
+          <td class="list__change"><span class="list__currency">${{ formatNumber(order.volume24h, 3) }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
 import ArrowUp from '../../assets/images/icons/arrow-up-icon.vue';
 import ArrowDown from '../../assets/images/icons/arrow-down-icon.vue';
+import Search from '../../assets/images/icons/search-icon.vue';
+
 export default {
-    name: "orders-list",
-    data() {
-        return {}
+  name: "orders-list",
+  components: {
+    ArrowUp,
+    ArrowDown,
+    Search
+  },
+  data() {
+    return {
+      inputFocused: false,
+      searchText: '',
+      debounceTimer: null
+    }
+  },
+  created() {
+    this.$store.dispatch('orderList/initOrderList'); // varsayılan coinlerle başla
+  },
+  methods: {
+    formatNumber(value, decimals = 4) {
+      if (isNaN(value)) return value;
+      const parts = Number(value).toFixed(decimals).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return parts.join('.');
     },
-    components: {
-        ArrowUp,
-        ArrowDown
-    },
-    props: {
-        orders: {
-            tyoe: Array,
-            required: true
+    onSearchInput() {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => {
+        const symbol = this.searchText.trim().toUpperCase();
+        if (symbol.length >= 2) {
+          this.$store.dispatch('orderList/watchCoin', symbol);
         }
-    },
-    created() { },
-    methods: {
-        formatNumber(value, decimals = 4) {
-            if (isNaN(value)) return value;
-            const parts = Number(value).toFixed(decimals).split('.');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            return parts.join('.');
-        },
-    },
-    computed: {}
+      }, 600);
+    }
+  },
+  computed: {
+    orders() {
+      return this.$store.state.orderList.orders;
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -101,6 +122,46 @@ export default {
     &__header {
         display: flex;
         justify-content: center;
+        position: relative;
+    }
+
+    &__input {
+        position: absolute;
+        transform: translateY(-50%);
+        top: 50%;
+        left: 0;
+        background-color: #0F1021;
+        outline: none;
+        border: none;
+        color: #ffffff;
+        padding: 10px 20px;
+        border: 1px solid #5349CA;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        transition: 0.5;
+
+        &.-focused {
+            border-color: #FF3BD4;
+            box-shadow: 0 0 26px -5px #FF3BD4;
+        }
+
+        &:hover {
+            border-color: #FF3BD4;
+            box-shadow: 0 0 26px -5px #FF3BD4;
+        }
+
+        input {
+            background: none;
+            border: none;
+            outline: none;
+            color: #ffffff;
+
+            &:focus {
+                border: none;
+                outline: none;
+            }
+        }
     }
 
     &__title {

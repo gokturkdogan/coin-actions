@@ -2,7 +2,7 @@
   <div class="orders">
     <img class="orders__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="orders__content">
-      <List v-if="orders" :orders="orders"/>
+      <List v-if="orders"/>
     </div>
     <img class="orders__divider" src="../assets/images/backgorunds/divider.svg" alt="">
   </div>
@@ -24,9 +24,6 @@ export default {
   },
   beforeUnmount() {
     this.$store.dispatch('orderList/stopOrderList');
-  },
-  methods: {
-
   },
   computed: {
     orders() {

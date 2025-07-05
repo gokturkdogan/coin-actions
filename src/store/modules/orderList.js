@@ -32,32 +32,36 @@ const orderList = {
     initOrderList({ commit, dispatch }) {
       commit('clearSockets');
       commit('clearOrders');
-
       const coins = [
         'BTC', 'ETH', 'BNB', 'SOL', 'ADA',
         'XRP', 'AVAX', 'DOGE', 'DOT', 'MATIC',
         'LTC', 'SHIB', 'LINK', 'BCH', 'XLM',
         'NEAR', 'FIL', 'ATOM', 'APT', 'ICP'
       ];
-
-      coins.forEach(symbol => {
+      const initialCoins = coins.slice(0, 5);
+      const delayedCoins = coins.slice(5);
+      initialCoins.forEach(symbol => {
         dispatch('connectTradeSocket', symbol);
         dispatch('connectTickerSocket', symbol);
       });
+      setTimeout(() => {
+        delayedCoins.forEach((symbol, index) => {
+          setTimeout(() => {
+            dispatch('connectTradeSocket', symbol);
+            dispatch('connectTickerSocket', symbol);
+          }, index * 300);
+        });
+      }, 2000);
     },
-
     connectTradeSocket({ commit, state }, symbol) {
       const pair = symbol.toLowerCase() + 'usdt';
       const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${pair}@trade`);
-
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         const price = parseFloat(data.p);
         const qty = parseFloat(data.q);
         const total = price * qty;
-
         const ticker = state.tickers[symbol] || {};
-
         const order = {
           symbol: symbol.toUpperCase(),
           price: price.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
@@ -70,47 +74,36 @@ const orderList = {
           changeAmount: ticker.changeAmount || null,
           volume24h: ticker.volume24h || null,
         };
-
         commit('addOrder', order);
       };
-
       socket.onerror = (err) => {
         console.error(`Trade socket error for ${symbol}:`, err);
       };
-
       commit('addSocket', socket);
     },
-
     connectTickerSocket({ commit }, symbol) {
       const pair = symbol.toLowerCase() + 'usdt';
       const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${pair}@ticker`);
-
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-
         const tickerData = {
           lastPrice: parseFloat(data.c).toFixed(2),
           changePercent: parseFloat(data.P).toFixed(2),
           changeAmount: parseFloat(data.p).toFixed(2),
           volume24h: parseFloat(data.q).toFixed(2),
         };
-
         commit('updateTicker', { symbol, data: tickerData });
       };
-
       socket.onerror = (err) => {
         console.error(`Ticker socket error for ${symbol}:`, err);
       };
-
       commit('addSocket', socket);
     },
-
     stopOrderList({ commit }) {
       commit('clearSockets');
       commit('clearOrders');
     }
   },
-
   getters: {
     allOrders: state => state.orders
   }

@@ -116,7 +116,11 @@ const coinDetail = {
         commit('setTickerData', {
           lastPrice: parseFloat(data.c).toFixed(2),
           changePercent: parseFloat(data.P).toFixed(2),
-          changeAmount: parseFloat(data.p).toFixed(2),
+          changeAmount: parseFloat(data.p).toFixed(4),
+          changeAmount: Number(data.p).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 4
+            }),
           volume24h: parseFloat(data.q).toFixed(2),
           high24h: parseFloat(data.h).toFixed(2),
           low24h: parseFloat(data.l).toFixed(2),

@@ -10,6 +10,7 @@
                 <div class="trades__text --price" :class="{ '-buy': trade.type === 'buy', '-sell': trade.type === 'sell' }">${{ formatNumber(trade.price, 2) }}</div>
                 <div class="trades__text">{{ formatNumber(trade.qty, 5) }}</div>
                 <div class="trades__text">{{ formatTime(trade.time)}}</div>
+                <div class="trades__tooltip" :class="{ '-buy': trade.type === 'buy', '-sell': trade.type === 'sell' }">${{ formatNumber(trade.qty * trade.price, 2)}}</div>
             </div>
         </div>
     </div>
@@ -80,6 +81,7 @@ export default {
             padding: 5px 10px;
             gap: 20px;
             cursor: pointer;
+            position: relative;
             &.-buy {
                 &:hover {
                     background-color: rgba(1, 167, 128, 0.271);
@@ -89,6 +91,29 @@ export default {
                 &:hover {
                     background-color: rgba(207, 48, 75, 0.271);
                 }
+            }
+
+            &:hover .trades__tooltip {
+                display: block;
+            }
+        }
+
+        &__tooltip {
+            position: absolute;
+            right: -90px;
+            top: 0;
+            background-color: #31324f;
+            padding: 5px;
+            width: 70px;
+            text-align: center;
+            display: none;
+            border-radius: 10px;
+
+            &.-buy {
+                color: rgb(1, 167, 129);
+            }
+            &.-sell {
+                color: rgb(207, 48, 74);
             }
         }
 

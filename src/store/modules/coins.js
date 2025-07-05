@@ -14,7 +14,7 @@ const coins = {
     previousPricesList: {},
     futuresDataMap: {},
     orders: [
-      { text: 'Varsayılan', type: 'default', isUp: false, isActive: true },
+      { text: 'Temizle', type: 'default', isUp: false, isActive: true },
       { text: 'Fiyat', type: 'lastPrice', isUp: false, isActive: false },
       { text: 'Spot Hacim', type: 'totalQuoteVolume', isUp: false, isActive: false },
       { text: 'Vadeli Hacim', type: 'futuresQuoteVolume', isUp: false, isActive: false },
@@ -178,7 +178,7 @@ const coins = {
       socket.onmessage = (event) => {
         const rawData = JSON.parse(event.data);
         const logos = state.logosList;
-        const fixedOrder = ['BTCUSDT', 'ETHUSDT', 'DOGEUSDT', 'SOLUSDT', 'TRXUSDT', 'XRPUSDT'];
+        const fixedOrder = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT'];
         const filteredData = rawData.filter(item => item.s.endsWith('USDT'));
         const currentCoinsMap = {};
         state.coinsDataList.forEach(coin => {
@@ -197,14 +197,14 @@ const coins = {
             if (newPriceNum > prevPrice) changeClass = '-up';
             else if (newPriceNum < prevPrice) changeClass = '-down';
           }
-          const futuresData = state.futuresDataMap[item.s] || {};
+          const futuresData = state.futuresDataMap?.[item.s] || {};
           currentCoinsMap[symbol] = {
             symbol,
             lastPrice: formattedPrice,
             priceChangePercent: Number(item.P).toFixed(2),
             logoUrl: logos[item.s] || '',
             changeClass,
-            totalVolume: Number(item.v).toFixed(5), // Spot coin cinsinden hacim
+            totalVolume: Number(item.v).toFixed(3), // Spot coin cinsinden hacim, nokta ve 5 basamak
             totalQuoteVolume: Number(item.q).toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
@@ -231,7 +231,9 @@ const coins = {
           combinedData.sort((a, b) => {
             const aIndex = fixedOrder.indexOf(a.symbol + 'USDT');
             const bIndex = fixedOrder.indexOf(b.symbol + 'USDT');
-            return aIndex - bIndex;
+            const aPos = aIndex === -1 ? fixedOrder.length : aIndex;
+            const bPos = bIndex === -1 ? fixedOrder.length : bIndex;
+            return aPos - bPos;
           });
         }
         const newPreviousPricesList = {};

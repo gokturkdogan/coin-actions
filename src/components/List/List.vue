@@ -1,8 +1,8 @@
 <template>
     <div class="list">
         <div class="list__header">
-            <div class="list__input" :class="{ '-focused': inputFocused }">
-                <input type="text" placeholder="Coin Ara" @focus="inputFocused = true" @blur="inputFocused = false">
+            <div class="list__input" :class="{ '-focused': inputFocused || searchText }">
+                <input type="text" v-model="searchText" placeholder="Coin Ara" @focus="inputFocused = true" @blur="inputFocused = false">
                 <Search />
             </div>
             <h2 class="list__title">TÜM COINLER</h2>
@@ -25,13 +25,13 @@
                     <th class="list__name">Coin</th>
                     <th class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">Fiyat</th>
                     <th class="list__name">Spot Hacim (Adet)</th>
-                    <th class="list__price" :class="{ '-active': activeOrderType === 'totalQuoteVolume' }">Spot Hacim
+                    <th class="list__name" :class="{ '-active': activeOrderType === 'totalQuoteVolume' }">Spot Hacim
                         (Usd)</th>
                     <th class="list__price">Vadeli Hacim (Adet)</th>
                     <th class="list__price" :class="{ '-active': activeOrderType === 'futuresQuoteVolume' }">Vadeli
                         Hacim (Usd)</th>
-                    <th class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">24s
-                        Değişim</th>
+                    <th class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
+                        Değişim 24s</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,16 +50,18 @@
                     </td>
                     <td class="list__name">
                         <span class="list__symbol">
-                            {{ coin.totalVolume }}({{ coin.symbol }})
+                            {{ coin.totalVolume }} <span class="list__cur"
+                                :class="{ '-up': coin.priceChangePercent > 0, '-down': coin.priceChangePercent < 0 }">
+                                ({{ coin.symbol }})</span>
                         </span>
                     </td>
                     <td :class="{ '-active': activeOrderType === 'totalQuoteVolume' }" class="list__price">
-                        <span class="list__currency">
+                        <span class="list__symbol">
                             <DollarIcon />{{ coin.totalQuoteVolume }}
                         </span>
                     </td>
                     <td class="list__price">
-                        <span class="list__currency">
+                        <span class="list__currency -withSpan">
                             {{ coin.futuresVolume }}({{ coin.symbol }})
                         </span>
                     </td>
@@ -94,7 +96,8 @@ export default {
     name: "home-list",
     data() {
         return {
-            inputFocused: false
+            inputFocused: false,
+            searchText: ''
         }
     },
     components: {
@@ -116,7 +119,10 @@ export default {
     },
     computed: {
         coins() {
-            return this.$store.getters['coins/coinsDataList'];
+            if (!this.searchText) return this.$store.getters['coins/coinsDataList'];
+            return this.$store.getters['coins/coinsDataList'].filter((coin) =>
+                coin.symbol.toLowerCase().includes(this.searchText.toLowerCase())
+            );
         },
         orders() {
             return this.$store.getters['coins/orders'];
@@ -153,18 +159,20 @@ export default {
         border: none;
         color: #ffffff;
         padding: 10px 20px;
-        border: 1px solid #0F1021;
+        border: 1px solid #5349CA;
         border-radius: 10px;
         display: flex;
         align-items: center;
         transition: 0.5;
 
         &.-focused {
-            border-color: #5349CA;
+            border-color: #FF3BD4;
+            box-shadow: 0 0 26px -5px #FF3BD4;
         }
 
         &:hover {
-            border-color: #5349CA;
+            border-color: #FF3BD4;
+            box-shadow: 0 0 26px -5px #FF3BD4;
         }
 
         input {
@@ -327,6 +335,20 @@ export default {
 
     &__symbol {
         display: flex;
+        align-items: center;
+    }
+
+    &__cur {
+        font-size: 12px;
+        margin-left: 5px;
+
+        &.-up {
+            color: #6ccf59;
+        }
+
+        &.-down {
+            color: #ff4d4d;
+        }
     }
 
     &__currency {
@@ -375,74 +397,6 @@ export default {
             background-color: rgba(240, 41, 52, .1);
             color: #ff4d4d;
         }
-    }
-
-    &__buttonArea {
-        margin-top: 50px;
-        display: flex;
-        justify-content: center;
-    }
-
-    &__button {
-        cursor: pointer;
-        border: 1px solid #FF3BD4;
-        color: #FF3BD4;
-        text-decoration: none;
-        font-size: 16px;
-        font-weight: 700;
-        border-radius: 6px;
-        padding: 15px;
-        width: 100%;
-        text-align: center;
-        position: relative;
-        background: none;
-        perspective: 2em;
-        -webkit-box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
-        -moz-box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
-        box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
-
-        &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0;
-            z-index: -1;
-            background-color: #FF3BD4;
-            box-shadow: 0 0 2em 0.2em #FF3BD4;
-            transition: opacity 100ms linear;
-        }
-
-        &:hover {
-            color: #FFFFFF;
-            text-shadow: none;
-            animation: none;
-
-            &::after {
-                opacity: 1;
-            }
-        }
-
-        &.-disabled {
-            color: #8a898a;
-            border-color: #8a898a;
-            -webkit-box-shadow: inset 0px 0px 0.5em 0px #8a898a, 0px 0px 0.5em 0px #8a898a;
-            -moz-box-shadow: inset 0px 0px 0.5em 0px #8a898a, 0px 0px 0.5em 0px #8a898a;
-            box-shadow: inset 0px 0px 0.5em 0px #8a898a, 0px 0px 0.5em 0px #8a898a;
-
-            &:hover {
-                color: #8a898a;
-                text-shadow: none;
-                animation: none;
-
-                &::after {
-                    opacity: 0;
-                }
-            }
-        }
-
     }
 }
 </style>

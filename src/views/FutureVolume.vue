@@ -21,10 +21,10 @@ export default {
   },
   created() {
     this.$store.dispatch('futureVolume/initSocket');
-    this.$store.dispatch('futureVolume/init1hVolumeForPriorityCoins');
+    this.$store.dispatch('futureVolume/fetchAll1hVolumes');
   },
   beforeUnmount() {
-    //this.$store.dispatch('orderBook/stopOrderBooks');
+    this.$store.dispatch('futureVolume/closeSocket');
   },
   computed: {
     volumes() {

@@ -21,7 +21,7 @@ export default {
   },
   created() {
     this.$store.dispatch('futureVolume/initSocket');
-    this.$store.dispatch('futureVolume/fetchDefault1hVolumes');
+    this.$store.dispatch('futureVolume/init1hVolumeForPriorityCoins');
   },
   beforeUnmount() {
     //this.$store.dispatch('orderBook/stopOrderBooks');

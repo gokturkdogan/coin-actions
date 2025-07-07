@@ -13,6 +13,12 @@ const futureVolume = {
       { text: '1s', type: '1Volume', isUp: false, isActive: false },
       { text: '% Değişim', type: 'priceChangePercent', isUp: false, isActive: false }
     ],
+    defaultOrderSymbols: [
+      "BTC", "ETH", "GUN", "XRP", "BSW", "DOGE", "MYRO", "EIGEN", "SOL", "AUCTION",
+      "POPCAT", "DUSK", "MASK", "PEOPLE", "1000PEPE", "BANANA", "ARB", "ARK",
+      "WIF", "ENJ", "CKB", "ALT", "WLD", "CFX", "APE", "EGLD", "TAO", "SNX",
+      "SYRUP", "TRB", "BONK"
+    ]
   }),
 
   mutations: {
@@ -39,6 +45,14 @@ const futureVolume = {
     }
   },
   actions: {
+    async fetchDefault1hVolumes({ dispatch, state }) {
+      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+      for (const symbol of state.defaultOrderSymbols) {
+        await dispatch('fetch1hVolume', symbol);
+        await delay(500); // her istekten sonra 500ms bekle
+      }
+    },
     initSocket({ commit, state }) {
       const socket = new WebSocket('wss://fstream.binance.com/ws/!ticker@arr');
 
@@ -115,7 +129,29 @@ const futureVolume = {
     allCoins: (state) => {
       const activeOrder = state.orders.find(order => order.isActive);
       const coinsArray = Object.entries(state.coins).map(([symbol, data]) => ({ symbol, ...data }));
-      if (!activeOrder || activeOrder.type === 'default') return coinsArray;
+
+      // Default sıralama
+      if (!activeOrder || activeOrder.type === 'default') {
+        const defaultList = [];
+        const others = [];
+
+        coinsArray.forEach(coin => {
+          if (state.defaultOrderSymbols.includes(coin.symbol)) {
+            defaultList.push(coin);
+          } else {
+            others.push(coin);
+          }
+        });
+
+        // default listede sırasına göre sırala
+        defaultList.sort((a, b) =>
+          state.defaultOrderSymbols.indexOf(a.symbol) - state.defaultOrderSymbols.indexOf(b.symbol)
+        );
+
+        return [...defaultList, ...others];
+      }
+
+      // Diğer sıralama türleri
       let sortKey = null;
       switch (activeOrder.type) {
         case 'lastPrice':
@@ -133,6 +169,7 @@ const futureVolume = {
         default:
           return coinsArray;
       }
+
       return coinsArray.sort((a, b) => {
         const valA = parseFloat(a[sortKey]) || 0;
         const valB = parseFloat(b[sortKey]) || 0;

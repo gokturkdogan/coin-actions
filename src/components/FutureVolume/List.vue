@@ -24,11 +24,11 @@
                 <tr>
                     <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name">Fiyat</th>
-                    <th class="list__price">Vadeli Hacim 24s</th>
-                    <th class="list__price">
+                    <th class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">Fiyat</th>
+                    <th class="list__price" :class="{ '-active': activeOrderType === '24Volume' }">Vadeli Hacim 24s</th>
+                    <th class="list__price" :class="{ '-active': activeOrderType === '1Volume' }">
                         Vadeli Hacim 1s</th>
-                    <th class="list__change">
+                    <th class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
                         Değişim %</th>
                 </tr>
             </thead>
@@ -45,28 +45,28 @@
                             {{ coin.symbol }}
                         </span>
                     </td>
-                    <td class="list__name">
+                    <td class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">
                         <img class="list__spinner" v-if="!coin.price" src="../../assets/images/gifs/spinner.gif"
                             alt="spinner">
                         <span v-else class="list__symbol" :class="coin.changeClass">
                             <DollarIcon />{{ formatNumber(coin.price, 2) }}
                         </span>
                     </td>
-                    <td class="list__price">
+                    <td class="list__price" :class="{ '-active': activeOrderType === '24Volume' }">
                         <img class="list__spinner" v-if="!coin.futuresVolume24h"
                             src="../../assets/images/gifs/spinner.gif" alt="spinner">
                         <span v-else class="list__currency -withSpan">
                             <DollarIcon />{{ formatNumber(coin.futuresVolume24h, 2) }}
                         </span>
                     </td>
-                    <td class="list__price">
+                    <td class="list__price" :class="{ '-active': activeOrderType === '1Volume' }">
                         <img class="list__spinner" v-if="!coin.futuresVolume1h"
                             src="../../assets/images/gifs/spinner.gif" alt="spinner">
                         <span v-else class="list__currency">
                             <DollarIcon />{{ formatNumber(coin.futuresVolume1h, 2) }}
                         </span>
                     </td>
-                    <td class="list__change">
+                    <td class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
                         <img class="list__spinner" v-if="!coin.changePercent24h"
                             src="../../assets/images/gifs/spinner.gif" alt="spinner">
                         <span v-else class="list__span">
@@ -131,6 +131,10 @@ export default {
         },
         orders() {
             return this.$store.getters['futureVolume/orders'];
+        },
+        activeOrderType() {
+            const activeOrder = this.orders.find(order => order.isActive);
+            return activeOrder ? activeOrder.type : null;
         }
     }
 };

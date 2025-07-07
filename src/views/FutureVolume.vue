@@ -21,6 +21,7 @@ export default {
   },
   created() {
     this.$store.dispatch('futureVolume/initSocket');
+    this.$store.dispatch('futureVolume/fetchDefault1hVolumes');
   },
   beforeUnmount() {
     //this.$store.dispatch('orderBook/stopOrderBooks');

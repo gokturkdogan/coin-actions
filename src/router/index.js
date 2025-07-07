@@ -8,6 +8,7 @@ import Coins from '@/layout/List.vue'
 import Detail from '@/layout/Detail.vue'
 import Orders from '@/layout/Orders.vue'
 import Book from '@/layout/Book.vue'
+import FutureVolume from '@/layout/FutureVolume.vue'
 
 const routes = [
   {
@@ -53,10 +54,16 @@ const routes = [
     component: Orders,
     meta: { requiresAuth: false }
   },
-    {
+  {
     path: '/order-book',
     name: 'Book',
     component: Book,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/future-volume',
+    name: 'FutureVolume',
+    component: FutureVolume,
     meta: { requiresAuth: false }
   }
 ]

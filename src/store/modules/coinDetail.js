@@ -1,4 +1,5 @@
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 const coinDetail = {
   namespaced: true,
@@ -52,6 +53,12 @@ const coinDetail = {
       state.socketTicker = null;
       state.socketDepth = null;
       state.socketTrades = null;
+    },
+    clearSocketTrades(state) {
+      if (state.socketTrades) {
+        state.socketTrades.close();
+        state.socketTrades = null;
+      }
     },
   },
 
@@ -108,6 +115,55 @@ const coinDetail = {
         console.error('Kline data fetch error:', error);
       }
     },
+    async fetchHistoricalTradesByRange({ commit }, { symbol, hours }) {
+      commit('clearSocketTrades');
+
+      const symbolQuery = `${symbol.toUpperCase()}USDT`;
+      const endTime = Date.now();
+      const allTrades = [];
+
+      // Her saatlik aralık için ayrı istek at
+      for (let i = hours; i > 0; i--) {
+        const rangeEnd = endTime - (i - 1) * 60 * 60 * 1000;
+        const rangeStart = rangeEnd - 60 * 60 * 1000;
+
+        try {
+          const response = await axios.get('https://api.binance.com/api/v3/aggTrades', {
+            params: {
+              symbol: symbolQuery,
+              startTime: rangeStart,
+              endTime: rangeEnd,
+              limit: 1000
+            }
+          });
+
+          const trades = response.data.map(t => {
+            const price = parseFloat(t.p);
+            const qty = parseFloat(t.q);
+            const total = price * qty;
+            return {
+              price: price.toFixed(2),
+              qty: qty.toFixed(4),
+              total: total,
+              time: dayjs(t.T).format('HH:mm:ss'),
+              type: t.m ? 'sell' : 'buy'
+            };
+          });
+
+          allTrades.push(...trades);
+
+        } catch (error) {
+          console.error(`${hours} saatlik trade verisi (saat ${i}) alınırken hata:`, error);
+        }
+      }
+
+      // Hepsini birleştir, büyükten küçüğe sırala, ilk 40'ı al
+      const sorted = allTrades
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 40);
+
+      commit('setTrades', sorted);
+    },
 
     connectTickerSocket({ commit }, symbol) {
       const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}usdt@ticker`);
@@ -116,11 +172,10 @@ const coinDetail = {
         commit('setTickerData', {
           lastPrice: parseFloat(data.c).toFixed(2),
           changePercent: parseFloat(data.P).toFixed(2),
-          changeAmount: parseFloat(data.p).toFixed(4),
           changeAmount: Number(data.p).toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 4
-            }),
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 4
+          }),
           volume24h: parseFloat(data.q).toFixed(2),
           high24h: parseFloat(data.h).toFixed(2),
           low24h: parseFloat(data.l).toFixed(2),
@@ -154,7 +209,7 @@ const coinDetail = {
         trades.unshift({
           price: parseFloat(data.p).toFixed(2),
           qty: parseFloat(data.q).toFixed(4),
-          time: data.T,
+          time: dayjs(data.T).format('HH:mm:ss'),
           type: data.m ? 'sell' : 'buy'
         });
         if (trades.length > 40) trades.pop();
@@ -166,7 +221,7 @@ const coinDetail = {
 
     closeCoinDetail({ commit }) {
       commit('clearSockets');
-      console.log('detail Socket kapandı')
+      console.log('detail Socket kapandı');
     },
   },
 

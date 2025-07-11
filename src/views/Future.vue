@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import List from '../components/FutureVolume/List.vue';
+import List from '../components/Future/List.vue';
 
 export default {
   name: "volume",
@@ -20,15 +20,15 @@ export default {
     List
   },
   created() {
-    this.$store.dispatch('futureVolume/initSocket');
-    this.$store.dispatch('futureVolume/fetchAll1hVolumes');
+    this.$store.dispatch('futureList/connectWebSocket');
+    //this.$store.dispatch('futureVolume/fetchAll1hVolumes');
   },
   beforeUnmount() {
-    this.$store.dispatch('futureVolume/closeSocket');
+    this.$store.dispatch('futureList/disconnectWebSocket');
   },
   computed: {
     volumes() {
-      return this.$store.getters['futureVolume/allCoins']
+      return this.$store.getters['futureList/allCoins']
     }
   }
 };
@@ -49,7 +49,7 @@ export default {
       margin-top: 10px;
       display: flex;
       justify-content: center;
-      padding: 0 100px;
+      padding: 0 50px;
       color: white;
     }
   }

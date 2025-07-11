@@ -6,7 +6,7 @@
                     @blur="inputFocused = false">
                 <Search />
             </div>
-            <h2 class="list__title">VADELİ HACİM LİSTESİ</h2>
+            <h2 class="list__title">VADELİ COİN LİSTESİ</h2>
             <div class="list__tabs">
                 <div v-for="(tab, index) in orders" :key="index" class="list__tab" :class="{ '-active': tab.isActive }"
                     @click="order(tab)">
@@ -24,12 +24,13 @@
                 <tr>
                     <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">Fiyat</th>
-                    <th class="list__price" :class="{ '-active': activeOrderType === '24Volume' }">Vadeli Hacim 24s</th>
-                    <th class="list__price" :class="{ '-active': activeOrderType === '1Volume' }">
-                        Vadeli Hacim 1s</th>
-                    <th class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
-                        Değişim %</th>
+                    <th :class="{ '-active': activeOrderType === 'lastPrice' }" class="list__name">Fiyat</th>
+                    <th class="list__price">En Yüksek Fiyat 24s</th>
+                    <th class="list__change">En Düşük Fiyat 24s</th>
+                    <th class="list__change">Ortalama Fiyat 24s</th>
+                    <th :class="{ '-active': activeOrderType === 'quoteVolume' }" class="list__change">Vadeli Hacim 24s</th>
+                    <th :class="{ '-active': activeOrderType === 'quoteVolume1h' }" class="list__change">Vadeli Hacim 1s</th>
+                    <th :class="{ '-active': activeOrderType === 'priceChangePercent' }" class="list__change">Değişim 24s</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,44 +38,52 @@
                     @click="getVolume(coin.symbol)">
                     <td class="list__name">
                         <span class="list__symbol">
-                            {{ index + 1 }}
+                            {{ index }}
                         </span>
                     </td>
                     <td class="list__name">
                         <span class="list__symbol">
-                            {{ coin.symbol }}
+                            {{ symbolFormatter(coin.symbol) }}
                         </span>
                     </td>
                     <td class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">
-                        <img class="list__spinner" v-if="!coin.price" src="../../assets/images/gifs/spinner.gif"
-                            alt="spinner">
-                        <span v-else class="list__symbol" :class="coin.changeClass">
-                            <DollarIcon />{{ formatNumber(coin.price, 2) }}
+                        <span class="list__symbol" :class="coin.changeClass">
+                            <DollarIcon />{{ formatDecimal(coin.lastPrice) }}
                         </span>
                     </td>
-                    <td class="list__price" :class="{ '-active': activeOrderType === '24Volume' }">
-                        <img class="list__spinner" v-if="!coin.futuresVolume24h"
-                            src="../../assets/images/gifs/spinner.gif" alt="spinner">
-                        <span v-else class="list__currency -withSpan">
-                            <DollarIcon />{{ formatNumber(coin.futuresVolume24h, 2) }}
+                    <td class="list__price">
+                        <span class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.highPrice) }}
                         </span>
                     </td>
-                    <td class="list__price" :class="{ '-active': activeOrderType === '1Volume' }">
-                        <img class="list__spinner" v-if="!coin.futuresVolume1h"
-                            src="../../assets/images/gifs/spinner.gif" alt="spinner">
-                        <span v-else class="list__currency">
-                            <DollarIcon />{{ formatNumber(coin.futuresVolume1h, 2) }}
+                    <td class="list__price">
+                        <span class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.lowPrice) }}
                         </span>
+                    </td>
+                    <td class="list__price">
+                        <span class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.weightedAvgPrice) }}
+                        </span>
+                    </td>
+                    <td class="list__price" :class="{ '-active': activeOrderType === 'quoteVolume' }">
+                        <span class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.quoteVolume) }}
+                        </span>
+                    </td>
+                    <td class="list__price" :class="{ '-active': activeOrderType === 'quoteVolume1h' }">
+                        <span v-if="coin.quoteVolume1h" class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.quoteVolume1h) }}
+                        </span>
+                        <img v-else class="list__spinner" src="../../assets/images/gifs/spinner.gif" alt="spinner">
                     </td>
                     <td class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
-                        <img class="list__spinner" v-if="!coin.changePercent24h"
-                            src="../../assets/images/gifs/spinner.gif" alt="spinner">
-                        <span v-else class="list__span">
+                        <span class="list__span">
                             <span class="list__colored"
-                                :class="{ '-up': coin.changePercent24h > 0, '-down': coin.changePercent24h < 0 }">
-                                <ArrowUp v-if="coin.changePercent24h > 0" />
+                                :class="{ '-up': coin.priceChangePercent > 0, '-down': coin.priceChangePercent < 0 }">
+                                <ArrowUp v-if="coin.priceChangePercent > 0" />
                                 <ArrowDown v-else />
-                                {{ coin.changePercent24h }}
+                                {{ formatNumber(coin.priceChangePercent) }}%
                             </span>
                         </span>
                     </td>
@@ -90,6 +99,7 @@ import ArrowUp from '../../assets/images/icons/arrow-up-icon.vue';
 import ArrowDown from '../../assets/images/icons/arrow-down-icon.vue';
 import UpDown from '../../assets/images/icons/up-down-icon.vue';
 import Search from '../../assets/images/icons/search-icon.vue';
+import helpers from '../../mixins/helpers';
 export default {
     name: "home-list",
     data() {
@@ -106,14 +116,15 @@ export default {
         Search
     },
     created() { },
+    mixins: [helpers],
     methods: {
         order(tab) {
-            this.$store.commit('futureVolume/setOrderBy', { type: tab.type, isUp: !tab.isUp });
+            this.$store.commit('futureList/setOrder', { type: tab.type, isUp: !tab.isUp });
         },
         async getVolume(coin) {
             await this.$store.dispatch('futureVolume/fetch1hVolume', coin);
         },
-        formatNumber(value, decimals = 4) {
+        formatNumber(value, decimals = 1) {
             if (isNaN(value)) return value;
             const parts = Number(value).toFixed(decimals).split('.');
             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -122,15 +133,13 @@ export default {
     },
     computed: {
         volumes() {
-            const all = this.$store.getters['futureVolume/allCoins'];
+            const all = Object.values(this.$store.getters['futureList/allCoins']);
             const search = this.searchText.trim().toLowerCase();
-
             if (!search) return all;
-
             return all.filter(coin => coin.symbol.toLowerCase().includes(search));
         },
         orders() {
-            return this.$store.getters['futureVolume/orders'];
+            return this.$store.getters['futureList/getOrders'];
         },
         activeOrderType() {
             const activeOrder = this.orders.find(order => order.isActive);
@@ -292,6 +301,7 @@ export default {
         border-radius: 20px;
         border: 1px solid rgba(47, 51, 109, 0.6);
         margin-bottom: 50px;
+        font-size: 14px;
 
         th,
         td {

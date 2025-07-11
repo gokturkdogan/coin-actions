@@ -1,23 +1,23 @@
 <template>
   <div class="volume">
     <TheHeader :current-route="currentRoute"/>
-    <FutureVolume />
+    <Future />
     <TheFooter />
   </div>
 </template>
 
 <script>
 import TheHeader from '../components/Base/TheHeader.vue'
-import FutureVolume from '../views/FutureVolume.vue'
+import Future from '../views/Future.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
 export default {
-  name: "book-layout",
+  name: "future-layout",
   data() {
     return {}
   },
   components: {
     TheHeader,
-    FutureVolume,
+    Future,
     TheFooter
   },
   created() { },

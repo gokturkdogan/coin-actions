@@ -38,7 +38,7 @@
                     @click="getVolume(coin.symbol)">
                     <td class="list__name">
                         <span class="list__symbol">
-                            {{ index }}
+                            {{ index + 1 }}
                         </span>
                     </td>
                     <td class="list__name">

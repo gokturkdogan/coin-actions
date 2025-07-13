@@ -7,6 +7,7 @@ import coinDetail from './modules/coinDetail';
 import orderList from './modules/orderList';
 import orderBook from './modules/orderBook';
 import futureList from './modules/futureList';
+import spotList from './modules/spotList';
 
 export default createStore({
   modules: {
@@ -17,6 +18,7 @@ export default createStore({
     coinDetail,
     orderList,
     orderBook,
-    futureList
+    futureList,
+    spotList
   },
 });

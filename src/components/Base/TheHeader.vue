@@ -8,6 +8,7 @@
           <router-link to="/orders" class="header__link" :class="{ '-active': currentRoute === 'Orders' }">EMİR TAKİBİ</router-link>
           <router-link to="/order-book" class="header__link" :class="{ '-active': currentRoute === 'Book' }">ORDER BOOK</router-link>          
           <router-link to="/future-list" class="header__link" :class="{ '-active': currentRoute === 'Future' }">VADELİ COİNLER</router-link>
+          <router-link to="/spot-list" class="header__link" :class="{ '-active': currentRoute === 'Spot' }">SPOT COİNLER</router-link>
         </div>
         <!-- <router-link to="/login" class="header__button">Giriş Yap</router-link> -->
     </div>

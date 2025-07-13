@@ -9,6 +9,7 @@ import Detail from '@/layout/Detail.vue'
 import Orders from '@/layout/Orders.vue'
 import Book from '@/layout/Book.vue'
 import Future from '@/layout/Future.vue'
+import Spot from '@/layout/Spot.vue'
 
 const routes = [
   {
@@ -64,6 +65,12 @@ const routes = [
     path: '/future-list',
     name: 'Future',
     component: Future,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/spot-list',
+    name: 'Spot',
+    component: Spot,
     meta: { requiresAuth: false }
   }
 ]

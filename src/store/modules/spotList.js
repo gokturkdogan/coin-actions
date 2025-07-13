@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const futureList = {
+const spotList = {
   namespaced: true,
   state: () => ({
     coins: [],
@@ -30,7 +30,6 @@ const futureList = {
     clearSocket(state) {
       state.socket = null;
     },
-
     setCoinData(state, payload) {
       const newCoinsMap = {};
       state.coins.forEach(c => {
@@ -65,14 +64,12 @@ const futureList = {
         };
       });
 
-      // Aktif order'ı bul
       const activeOrder = state.orders.find(o => o.isActive);
       const allCoins = Object.values(newCoinsMap);
 
       let sortedCoins = [];
 
       if (!activeOrder || activeOrder.type === 'default') {
-        // Default order list ile sıralama
         const ordered = [];
         state.defaultOrderList.forEach(s => {
           const match = allCoins.find(c => c.symbol === s);
@@ -82,7 +79,6 @@ const futureList = {
         remaining.sort((a, b) => a.symbol.localeCompare(b.symbol));
         sortedCoins = [...ordered, ...remaining];
       } else {
-        // Aktif order'ın type'ına göre sıralama
         const type = activeOrder.type;
         const isUp = activeOrder.isUp;
 
@@ -93,7 +89,6 @@ const futureList = {
           return isUp ? bVal - aVal : aVal - bVal;
         });
 
-        // Sıraya girmeyen coinleri sona ekle
         const notIncluded = allCoins.filter(c => c[type] === undefined);
         sortedCoins = [...sortedCoins, ...notIncluded];
       }
@@ -126,14 +121,13 @@ const futureList = {
         return { ...order, isActive: false };
       });
     }
-
   },
 
   actions: {
     connectWebSocket({ commit, state, dispatch }) {
       if (state.socket) return;
 
-      const socket = new WebSocket('wss://fstream.binance.com/ws/!ticker@arr');
+      const socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -150,25 +144,23 @@ const futureList = {
 
         dispatch('fetch1hVolumesWithDelay', finalSymbols);
 
-        // Yeni fiyatları previousPrices state'ine kaydet
         const newPrevPrices = {};
         filtered.forEach(i => {
           newPrevPrices[i.s.replace('USDT', '')] = parseFloat(i.c);
         });
         commit('setPreviousPrices', newPrevPrices);
 
-        // 1.5 saniye sonra changeClass temizle
         setTimeout(() => {
           commit('clearChangeClass');
         }, 1500);
       };
 
       socket.onerror = (error) => {
-        console.error('[futureList] WebSocket Error:', error);
+        console.error('[spotList] WebSocket Error:', error);
       };
 
       socket.onclose = () => {
-        console.log('[futureList] WebSocket Closed');
+        console.log('[spotList] WebSocket Closed');
         commit('clearSocket');
       };
 
@@ -183,9 +175,8 @@ const futureList = {
     },
 
     async fetch1hVolume({ commit, state }, symbol) {
-      // localStorage key ve cache süresi (15 dakika)
-      const cacheKey = `volume1h_${symbol}`;
-      const cacheExpiryMs = 30 * 60 * 1000; // 15 dakika
+      const cacheKey = `spot_volume1h_${symbol}`;
+      const cacheExpiryMs = 30 * 60 * 1000;
 
       try {
         const cached = localStorage.getItem(cacheKey);
@@ -193,19 +184,16 @@ const futureList = {
           const parsed = JSON.parse(cached);
           const now = Date.now();
 
-          // Cache geçerli ise direkt kullan
           if (now - parsed.timestamp < cacheExpiryMs) {
             commit('setQuoteVolume1h', { symbol, quoteVolume1h: parsed.quoteVolume1h });
             commit('markVolumeFetched', symbol);
-            return; // İstek atma, cache'den dön
+            return;
           } else {
-            // Cache süresi geçmiş, temizle
             localStorage.removeItem(cacheKey);
           }
         }
 
-        // Cache yok veya süresi dolmuş, API'den al
-        const res = await axios.get('https://fapi.binance.com/fapi/v1/klines', {
+        const res = await axios.get('https://api.binance.com/api/v3/klines', {
           params: {
             symbol: symbol + 'USDT',
             interval: '1h',
@@ -217,16 +205,16 @@ const futureList = {
         const volume = parseFloat(candle[5]);
         const quoteVolume1h = close * volume;
 
-        // State ve cache'i güncelle
         commit('setQuoteVolume1h', { symbol, quoteVolume1h });
         commit('markVolumeFetched', symbol);
+
         localStorage.setItem(cacheKey, JSON.stringify({
           quoteVolume1h,
           timestamp: Date.now()
         }));
 
       } catch (err) {
-        console.error(`1h volume fetch failed for ${symbol}`, err);
+        console.error(`[spotList] 1h volume fetch failed for ${symbol}`, err);
       }
     },
 
@@ -236,7 +224,7 @@ const futureList = {
         await dispatch('fetch1hVolume', symbol);
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-    },
+    }
   },
 
   getters: {
@@ -246,4 +234,4 @@ const futureList = {
   }
 };
 
-export default futureList;
+export default spotList;

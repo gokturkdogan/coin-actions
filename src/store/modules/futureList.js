@@ -183,9 +183,28 @@ const futureList = {
     },
 
     async fetch1hVolume({ commit, state }, symbol) {
-      if (state.volumeFetched[symbol]) return;
+      // localStorage key ve cache süresi (15 dakika)
+      const cacheKey = `volume1h_${symbol}`;
+      const cacheExpiryMs = 15 * 60 * 1000; // 15 dakika
 
       try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const now = Date.now();
+
+          // Cache geçerli ise direkt kullan
+          if (now - parsed.timestamp < cacheExpiryMs) {
+            commit('setQuoteVolume1h', { symbol, quoteVolume1h: parsed.quoteVolume1h });
+            commit('markVolumeFetched', symbol);
+            return; // İstek atma, cache'den dön
+          } else {
+            // Cache süresi geçmiş, temizle
+            localStorage.removeItem(cacheKey);
+          }
+        }
+
+        // Cache yok veya süresi dolmuş, API'den al
         const res = await axios.get('https://fapi.binance.com/fapi/v1/klines', {
           params: {
             symbol: symbol + 'USDT',
@@ -198,8 +217,14 @@ const futureList = {
         const volume = parseFloat(candle[5]);
         const quoteVolume1h = close * volume;
 
+        // State ve cache'i güncelle
         commit('setQuoteVolume1h', { symbol, quoteVolume1h });
         commit('markVolumeFetched', symbol);
+        localStorage.setItem(cacheKey, JSON.stringify({
+          quoteVolume1h,
+          timestamp: Date.now()
+        }));
+
       } catch (err) {
         console.error(`1h volume fetch failed for ${symbol}`, err);
       }

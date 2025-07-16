@@ -3,7 +3,8 @@
     <img class="home__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="home__section">
       <Banner @open-modal="openModal" />
-      <List @open-modal="openModal"/>
+      <img class="home__spinner" v-if="!spinner" src="../assets/images/gifs/spinner.gif" alt="spinner">
+      <List v-else @open-modal="openModal"/>
     </div>
     <img class="home__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <!-- <Advantages /> -->
@@ -43,6 +44,11 @@ export default {
       this.isModalShow = false;
     }
   },
+  computed: {
+    spinner() {
+      return this.$store.getters['coins/spinnerHome'] 
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -50,6 +56,13 @@ export default {
     &__section {
       background-image: url('../assets/images/backgorunds/home-banner.svg');
       padding: 0 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    &__spinner {
+      margin-top: 50px;
     }
 
     &__divider {

@@ -13,6 +13,7 @@ const coins = {
     logosList: {},
     previousPricesList: {},
     futuresDataMap: {},
+    spinnerHome: false,
     orders: [
       { text: 'Temizle', type: 'default', isUp: false, isActive: true },
       { text: 'Fiyat', type: 'lastPrice', isUp: false, isActive: false },
@@ -55,8 +56,12 @@ const coins = {
     },
     setOrders(state, payload) {
       state.orders = payload;
+    },
+    setSpinnerHome(state, value) {
+      state.spinnerHome = value;
     }
   },
+
   actions: {
     async fetchLogos({ commit }) {
       const ids = 'bitcoin,ethereum,binancecoin,solana,ripple';
@@ -86,10 +91,13 @@ const coins = {
         console.error('Logo fetch hatası:', error);
       }
     },
+
     async connectWebSocketForHome({ commit, state, dispatch }) {
       if (state.socket) return;
       await dispatch('fetchLogos');
+
       const socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+
       socket.onmessage = (event) => {
         const rawData = JSON.parse(event.data);
         const selectedSymbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT'];
@@ -97,9 +105,11 @@ const coins = {
         const logos = state.logos;
         const previousPrices = state.previousPrices;
         const currentCoinsMap = {};
+
         state.coinsData.forEach(coin => {
           currentCoinsMap[coin.symbol] = coin;
         });
+
         rawData
           .filter(item => selectedSymbols.includes(item.s))
           .forEach(item => {
@@ -122,34 +132,44 @@ const coins = {
               changeClass,
             };
           });
+
         const combinedData = Object.values(currentCoinsMap).sort((a, b) =>
           order.indexOf(a.symbol + 'USDT') - order.indexOf(b.symbol + 'USDT')
         );
+
         const newPreviousPrices = {};
         combinedData.forEach(item => {
           newPreviousPrices[item.symbol] = Number(item.lastPrice.replace(/,/g, ''));
         });
+
         commit('setPreviousPrices', newPreviousPrices);
         commit('setCoinsData', combinedData);
+        commit('setSpinnerHome', true); // <-- spinner aktif oldu
+
         setTimeout(() => {
           const clearedData = combinedData.map(item => ({ ...item, changeClass: '' }));
           commit('setCoinsData', clearedData);
         }, 1500);
       };
+
       socket.onerror = (error) => {
         console.error('WebSocket hata:', error);
       };
+
       socket.onclose = () => {
         console.log('WebSocket kapandı');
         commit('setSocket', null);
       };
+
       commit('setSocket', socket);
     },
+
     disconnectWebSocketForHome({ state, commit }) {
       if (state.socket) {
         state.socket.close();
         commit('setSocket', null);
       }
+      commit('setSpinnerHome', false); // <-- socket kapanınca spinner sıfırla
     },
     async fetchLogosForList({ commit }) {
       try {
@@ -295,8 +315,10 @@ const coins = {
   getters: {
     coinsData: (state) => state.coinsData,
     coinsDataList: (state) => state.coinsDataList,
+    spinnerHome: (state) => state.spinnerHome, // <-- EKLENDİ
     orders: (state) => state.orders.filter(order => order.type !== 'default'),
     activeOrder: (state) => state.orders.find(order => order.isActive),
+    coinsDataList: (state) => state.coinsDataList,
   },
 };
 

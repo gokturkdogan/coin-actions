@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0'
   },
-  base: '/food-generator/',
+  base: '/coin-actions/',
   css: {
     preprocessorOptions: {
 /*       scss: {

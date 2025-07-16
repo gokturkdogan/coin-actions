@@ -13,62 +13,62 @@ import Spot from '@/layout/Spot.vue'
 
 const routes = [
   {
-    path: '/',
+    path: '/coin-actions/',
     name: 'Home',
     component: Home,
     meta: { requiresAuth: false }
   },
   {
-    path: '/login',
+    path: '/coin-actions/login',
     name: 'Login',
     component: Login,
     meta: { guestOnly: true }
   },
   {
-    path: '/register',
+    path: '/coin-actions/register',
     name: 'Register',
     component: Register,
     meta: { guestOnly: true }
   },
   {
-    path: '/reset-password',
+    path: '/coin-actions/reset-password',
     name: 'Forgot',
     component: Forgot,
     meta: { guestOnly: true }
   },
   {
-    path: '/coin-list',
+    path: '/coin-actions/coin-list',
     name: 'Coins',
     component: Coins,
     meta: { requiresAuth: false }
   },
   {
-    path: '/coin-detail/:symbol',
+    path: '/coin-actions/coin-detail/:symbol',
     name: 'CoinDetail',
     component: Detail,
     props: true,
     meta: { requiresAuth: false }
   },
   {
-    path: '/orders',
+    path: '/coin-actions/orders',
     name: 'Orders',
     component: Orders,
     meta: { requiresAuth: false }
   },
   {
-    path: '/order-book',
+    path: '/coin-actions/order-book',
     name: 'Book',
     component: Book,
     meta: { requiresAuth: false }
   },
   {
-    path: '/future-list',
+    path: '/coin-actions/future-list',
     name: 'Future',
     component: Future,
     meta: { requiresAuth: false }
   },
   {
-    path: '/spot-list',
+    path: '/coin-actions/spot-list',
     name: 'Spot',
     component: Spot,
     meta: { requiresAuth: false }

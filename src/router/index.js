@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/layout/Main.vue'
 import Coins from '@/layout/List.vue'
 import Detail from '@/layout/Detail.vue'
-import Orders from '@/layout/Orders.vue'
 import Book from '@/layout/Book.vue'
 import Future from '@/layout/Future.vue'
 import Spot from '@/layout/Spot.vue'
@@ -25,12 +24,6 @@ const routes = [
     name: 'CoinDetail',
     component: Detail,
     props: true,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/coin-actions/orders',
-    name: 'Orders',
-    component: Orders,
     meta: { requiresAuth: false }
   },
   {

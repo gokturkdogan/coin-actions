@@ -5,7 +5,6 @@
         <div class="header__nav">
           <router-link to="/coin-actions/" class="header__link" :class="{ '-active': currentRoute === 'Home' }">ANASAYFA</router-link>
           <router-link to="/coin-actions/coin-list" class="header__link" :class="{ '-active': currentRoute === 'Coins' }">COİN LİSTESİ</router-link>
-          <router-link to="/coin-actions/orders" class="header__link" :class="{ '-active': currentRoute === 'Orders' }">EMİR TAKİBİ</router-link>
           <router-link to="/coin-actions/order-book" class="header__link" :class="{ '-active': currentRoute === 'Book' }">ORDER BOOK</router-link>          
           <router-link to="/coin-actions/future-list" class="header__link" :class="{ '-active': currentRoute === 'Future' }">VADELİ COİNLER</router-link>
           <router-link to="/coin-actions/spot-list" class="header__link" :class="{ '-active': currentRoute === 'Spot' }">SPOT COİNLER</router-link>

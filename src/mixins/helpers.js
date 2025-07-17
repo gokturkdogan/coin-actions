@@ -13,6 +13,10 @@ export default {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 4,
             });
+        },
+        percentFormatter(value) {
+            if (typeof value !== 'number') return '';
+            return value.toFixed(2);
         }
     }
 }

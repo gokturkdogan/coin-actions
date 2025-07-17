@@ -19,10 +19,10 @@ export default {
     List
   },
   created() {
-    this.$store.dispatch('coins/connectWebSocketForList');
+    this.$store.dispatch('coinList/connectTickerSocket');
   },
   beforeUnmount() {
-    this.$store.dispatch('coins/disconnectWebSocketForList');
+    this.$store.dispatch('coinList/disconnectTickerSocket');
   },
   methods: {},
 };

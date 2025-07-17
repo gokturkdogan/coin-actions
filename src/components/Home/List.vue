@@ -6,31 +6,30 @@
         <table class="list__table">
             <thead>
                 <tr>
-                    <th class="list__number">#</th>
                     <th class="list__name">Coin</th>
                     <th class="list__price">Fiyat</th>
                     <th class="list__change">24s Değişim</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" v-for="(coin, index) in coins" :key="index" :class="coin.changeClass">
-                    <td class="list__number">{{ index + 1 }}</td>
+                <tr class="list__item" v-for="(coin, index) in coins" :key="index" :class="priceStatus[coin.symbol]">
                     <td class="list__name">
                         <span class="list__symbol">
-                            <img class="list__img" :src="coin.logoUrl" alt="">{{ coin.symbol }}
+                            <img class="list__img" :src="logos[coin.symbol]" alt="coin_logo" />
+                            {{ symbolFormatter(coin.symbol) }}
                         </span>
                     </td>
                     <td class="list__price">
                         <span class="list__currency">
-                            <DollarIcon />{{ coin.lastPrice }}
+                            <DollarIcon />{{ formatDecimal(coin.price) }}
                         </span>
                     </td>
                     <td class="list__change">
                         <span class="list__span">
-                            <span class="list__colored" :class="{ '-up': coin.priceChangePercent > 0, '-down':  coin.priceChangePercent < 0 }">
-                                <ArrowUp v-if="coin.priceChangePercent > 0"/>
-                                <ArrowDown v-else/>
-                                {{ coin.priceChangePercent }}
+                            <span class="list__colored" :class="{ '-up': coin.change > 0, '-down': coin.change < 0 }">
+                                <ArrowUp v-if="coin.change > 0" />
+                                <ArrowDown v-else />
+                                {{ percentFormatter(coin.change) }} %
                             </span>
                         </span>
                     </td>
@@ -38,39 +37,65 @@
             </tbody>
         </table>
         <div class="list__buttonArea">
-            <span @click="showCoins()" class="list__button">Daha Fazla Coin Gör</span>
+            <router-link class="list__button" to="/coin-actions/coin-list">Daha Fazla Coin Gör</router-link>
         </div>
     </div>
 </template>
 
 <script>
-import Modal from './Modal.vue';
 import DollarIcon from '../../assets/images/icons/dollar-icon.vue';
 import ArrowUp from '../../assets/images/icons/arrow-up-icon.vue';
 import ArrowDown from '../../assets/images/icons/arrow-down-icon.vue';
+import helpers from '../../mixins/helpers';
 export default {
-    name: "home-list",
-    data() {
-        return {}
-    },
+    name: 'home-list',
     components: {
-        Modal,
         DollarIcon,
         ArrowUp,
-        ArrowDown
+        ArrowDown,
     },
-    created() { },
-    methods: {
-        showCoins() {
-            this.$router.push({ name: 'Coins' });
-            //this.$emit('open-modal');
-        }
+    data() {
+        return {
+            priceStatus: {}
+        };
     },
+    mixins: [helpers],
     computed: {
         coins() {
-            return this.$store.getters['coins/coinsData'];
-        }
-    }
+            return this.$store.getters['home/allPrices'];
+        },
+        logos() {
+            return this.$store.getters['home/getLogos'];
+        },
+    },
+    watch: {
+        coins: {
+            deep: true,
+            immediate: true,
+            handler(newCoins, oldCoins) {
+                if (!oldCoins) return;
+                for (const symbol in newCoins) {
+                    const newPrice = parseFloat(newCoins[symbol].price);
+                    const oldPrice = oldCoins[symbol] ? parseFloat(oldCoins[symbol].price) : null;
+                    if (oldPrice === null) continue;
+
+                    if (newPrice > oldPrice) {
+                        this.setPriceStatus(symbol, '-up');
+                    } else if (newPrice < oldPrice) {
+                        this.setPriceStatus(symbol, '-down');
+                    }
+                }
+            },
+        },
+    },
+    methods: {
+        setPriceStatus(symbol, status) {
+            this.priceStatus = { ...this.priceStatus, [symbol]: status };
+            setTimeout(() => {
+                this.priceStatus = { ...this.priceStatus, [symbol]: '' };
+            }, 2000);
+        },
+    },
 };
 </script>
 <style lang="scss" scoped>
@@ -155,6 +180,7 @@ export default {
             background-color: rgba(0, 200, 0, 0.255);
             transition: background-color 1s ease;
         }
+
         &.-down {
             background-color: rgba(200, 0, 0, 0.255);
             transition: background-color 1s ease;

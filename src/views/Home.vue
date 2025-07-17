@@ -2,21 +2,17 @@
   <div class="home">
     <img class="home__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="home__section">
-      <Banner @open-modal="openModal" />
-      <img class="home__spinner" v-if="!spinner" src="../assets/images/gifs/spinner.gif" alt="spinner">
-      <List v-else @open-modal="openModal"/>
+      <Banner />
+      <List/>
     </div>
     <img class="home__divider" src="../assets/images/backgorunds/divider.svg" alt="">
-    <!-- <Advantages /> -->
-    <Modal v-if="isModalShow" @close-modal="closeModal"/>
   </div>
 </template>
 
 <script>
 import Banner from '../components/Home/Banner.vue';
 import List from '../components/Home/List.vue';
-import Modal from '../components/Home/Modal.vue';
-//import Advantages from '../components/Home/Advantages.vue';
+
 export default {
   name: "home",
   data() {
@@ -26,15 +22,14 @@ export default {
   },
   components: {
     Banner,
-    List,
-    Modal,
-    //Advantages
+    List
   },
   created() {
-    this.$store.dispatch('coins/connectWebSocketForHome');
+    this.$store.dispatch('home/connectPriceSocket');
+    this.$store.dispatch('home/fetchLogos');
   },
   beforeUnmount() {
-    this.$store.dispatch('coins/disconnectWebSocketForHome');
+    this.$store.dispatch('home/disconnectPriceSocket');
   },
   methods: {
     openModal() {
@@ -42,11 +37,6 @@ export default {
     },
     closeModal() {
       this.isModalShow = false;
-    }
-  },
-  computed: {
-    spinner() {
-      return this.$store.getters['coins/spinnerHome'] 
     }
   }
 };

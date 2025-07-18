@@ -3,8 +3,6 @@
         <div class="banner__text">COIN ACTIONS İle Takipte Kalın</div>
         <div class="banner__buttons">
             <router-link class="banner__button" to="/coin-actions/coin-list">Tüm Coinler</router-link>
-            <router-link class="banner__button" to="/coin-actions/future-list">Vadeli Coinler</router-link>
-            <router-link class="banner__button" to="/coin-actions/spot-list">Spot Coinler</router-link>
         </div>
     </div>
 </template>

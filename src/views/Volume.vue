@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import List from '../components/Spot/List.vue';
+import List from '../components/Volume/List.vue';
 
 export default {
   name: "volume",
@@ -20,15 +20,14 @@ export default {
     List
   },
   created() {
-    this.$store.dispatch('spotList/connectWebSocket');
-    //this.$store.dispatch('futureVolume/fetchAll1hVolumes');
+    this.$store.dispatch('volume/connectKlineSocket');
   },
   beforeUnmount() {
-    this.$store.dispatch('spotList/disconnectWebSocket');
+    this.$store.dispatch('volume/disconnectKlineSocket');
   },
   computed: {
     volumes() {
-      return this.$store.getters['spotList/allCoins']
+      return this.$store.getters['volume/getCoinData']
     }
   }
 };

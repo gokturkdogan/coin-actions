@@ -17,6 +17,16 @@ export default {
         percentFormatter(value) {
             if (typeof value !== 'number') return '';
             return value.toFixed(2);
+        },
+        formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('tr-TR', {
+                timeZone: 'Europe/Istanbul',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            });
         }
     }
 }

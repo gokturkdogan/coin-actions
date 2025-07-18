@@ -6,85 +6,105 @@
                     @blur="inputFocused = false">
                 <Search />
             </div>
-            <h2 class="list__title">SPOT COİN LİSTESİ</h2>
-            <div class="list__tabs">
-                <div v-for="(tab, index) in orders" :key="index" class="list__tab" :class="{ '-active': tab.isActive }"
-                    @click="order(tab)">
-                    <span class="list__tabText">{{ tab.text }}</span>
-                    <span class="list__tabICon">
-                        <UpDown v-if="!tab.isActive" />
-                        <ArrowUp v-else-if="tab.isUp" />
-                        <ArrowDown v-else />
-                    </span>
-                </div>
-            </div>
+            <h2 class="list__title">SAATLİK HACİM TAKİBİ</h2>
         </div>
         <table class="list__table">
             <thead>
                 <tr>
-                    <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th :class="{ '-active': activeOrderType === 'lastPrice' }" class="list__name">Fiyat</th>
-                    <th class="list__price">En Yüksek Fiyat 24s</th>
-                    <th class="list__change">En Düşük Fiyat 24s</th>
-                    <th class="list__change">Ortalama Fiyat 24s</th>
-                    <th :class="{ '-active': activeOrderType === 'quoteVolume' }" class="list__change">Spot Hacim 24s</th>
-                    <th :class="{ '-active': activeOrderType === 'quoteVolume1h' }" class="list__change">Spot Hacim 1s</th>
-                    <th :class="{ '-active': activeOrderType === 'priceChangePercent' }" class="list__change">Değişim 24s</th>
+                    <th class="list__name">Açılış <span class="list__tooltip">Geçmiş 1 saatlik mum açılış saati</span></th>
+                    <th class="list__name"> Kapanış <span class="list__tooltip">Geçmiş 1 saatlik mum kapanış saati</span></th>
+                    <th class="list__name"> Açılış<span class="list__tooltip">Geçmiş 1 saatlik mum açılış fiyatı</span></th>
+                    <th class="list__name"> Kapanış<span class="list__tooltip">Geçmiş 1 saatlik mum kapanış fiyatı</span></th>
+                    <th class="list__name"> Yüksek<span class="list__tooltip">Geçmiş 1 saatlik mum en yüksek fiyat</span></th>
+                    <th class="list__name"> Düşük<span class="list__tooltip">Geçmiş 1 saatlik mum en düşük fiyat</span></th>
+                    <th class="list__name"> Hacim<span class="list__tooltip">Geçmiş 1 saatlik mum toplam hacim</span></th>
+                    <th class="list__name"> Trade<span class="list__tooltip">Geçmiş 1 saatlik mum yapılan toplam trade</span></th>
+                    <th class="list__name"> Açılış<span class="list__tooltip">Güncel 1 saatlik mum açılış saati</span></th>
+                    <th class="list__change"> Yüksek<span class="list__tooltip">Güncel 1 saatlik mum en yüksek fiyat</span></th>
+                    <th class="list__change"> Düşük<span class="list__tooltip">Güncel 1 saatlik mum en düşük fiyat</span></th>
+                    <th class="list__change"> Hacim<span class="list__tooltip">Güncel 1 saatlik mum anlık hacim</span></th>
+                    <th class="list__change"> Trade<span class="list__tooltip">Güncel 1 saatlik mum yapılan trade sayısı</span></th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" :class="coin.changeClass" v-for="(coin, index) in volumes" :key="index"
-                    @click="getVolume(coin.symbol)">
-                    <td class="list__name">
-                        <span class="list__symbol">
-                            {{ index + 1 }}
-                        </span>
-                    </td>
+                <tr class="list__item" v-for="coin in volumes" :key="coin.symbol">
                     <td class="list__name">
                         <span class="list__symbol">
                             {{ symbolFormatter(coin.symbol) }}
                         </span>
                     </td>
-                    <td class="list__name" :class="{ '-active': activeOrderType === 'lastPrice' }">
-                        <span class="list__symbol" :class="coin.changeClass">
-                            <DollarIcon />{{ formatDecimal(coin.lastPrice) }}
+                    <td class="list__name">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            {{ formatTime(coin.previousKline.openTime) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__name">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            {{ formatTime(coin.previousKline.closeTime) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__name">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKline.open) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__name">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKline.close) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__name">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKline.high) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKline.low) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKline.quoteAssetVolume) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price">
+                        <span v-if="coin.previousKline" class="list__symbol">
+                            {{ coin.previousKline.numberOfTrades }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>                    
+                    <td class="list__price">
+                        <span class="list__currency">
+                            {{ formatTime(coin.liveKline?.openTime) || '-' }}
                         </span>
                     </td>
                     <td class="list__price">
                         <span class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.highPrice) }}
+                            <DollarIcon />{{ formatDecimal(coin.liveKline?.high) || '-' }}
+                        </span>
+                    </td>                    
+                    <td class="list__price">
+                        <span class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.liveKline?.low) || '-' }}
                         </span>
                     </td>
                     <td class="list__price">
                         <span class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.lowPrice) }}
+                            <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
                         </span>
-                    </td>
+                    </td>                    
                     <td class="list__price">
                         <span class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.weightedAvgPrice) }}
-                        </span>
-                    </td>
-                    <td class="list__price" :class="{ '-active': activeOrderType === 'quoteVolume' }">
-                        <span class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.quoteVolume) }}
-                        </span>
-                    </td>
-                    <td class="list__price" :class="{ '-active': activeOrderType === 'quoteVolume1h' }">
-                        <span v-if="coin.quoteVolume1h" class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.quoteVolume1h) }}
-                        </span>
-                        <img v-else class="list__spinner" src="../../assets/images/gifs/spinner.gif" alt="spinner">
-                    </td>
-                    <td class="list__change" :class="{ '-active': activeOrderType === 'priceChangePercent' }">
-                        <span class="list__span">
-                            <span class="list__colored"
-                                :class="{ '-up': coin.priceChangePercent > 0, '-down': coin.priceChangePercent < 0 }">
-                                <ArrowUp v-if="coin.priceChangePercent > 0" />
-                                <ArrowDown v-else />
-                                {{ formatNumber(coin.priceChangePercent) }}%
-                            </span>
+                            {{ coin.liveKline?.numberOfTrades || '-' }}
                         </span>
                     </td>
                 </tr>
@@ -117,33 +137,10 @@ export default {
     },
     created() { },
     mixins: [helpers],
-    methods: {
-        order(tab) {
-            this.$store.commit('spotList/setOrder', { type: tab.type, isUp: !tab.isUp });
-        },
-        async getVolume(coin) {
-            await this.$store.dispatch('spotList/fetch1hVolume', coin);
-        },
-        formatNumber(value, decimals = 1) {
-            if (isNaN(value)) return value;
-            const parts = Number(value).toFixed(decimals).split('.');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            return parts.join('.');
-        },
-    },
+    methods: {},
     computed: {
         volumes() {
-            const all = Object.values(this.$store.getters['spotList/allCoins']);
-            const search = this.searchText.trim().toLowerCase();
-            if (!search) return all;
-            return all.filter(coin => coin.symbol.toLowerCase().includes(search));
-        },
-        orders() {
-            return this.$store.getters['spotList/getOrders'];
-        },
-        activeOrderType() {
-            const activeOrder = this.orders.find(order => order.isActive);
-            return activeOrder ? activeOrder.type : null;
+            return this.$store.getters['volume/getCoinData']
         }
     }
 };
@@ -303,6 +300,21 @@ export default {
         margin-bottom: 50px;
         font-size: 14px;
 
+        thead {
+            font-size: 13px;
+
+            th {
+                cursor: pointer;
+                &:hover {
+                    box-shadow: 0 0 26px -5px #FF3BD4;
+                    color: #FF3BD4;
+                }
+                &:hover .list__tooltip {
+                    display: block;
+                }
+            }
+        }
+
         th,
         td {
             padding: 20px 10px;
@@ -350,6 +362,21 @@ export default {
     &__name {
         width: 270px;
         text-align: left;
+        position: relative;
+    }
+
+    &__tooltip {
+        position: absolute;
+        background-color: #000000;
+        border: 1px solid #FF3BD4;
+        color: #ffffff;
+        padding: 5px 20px;
+        top: -50px;
+        right: 0;
+        border-radius: 20px;
+        width: max-content;
+        box-shadow: 0 0 26px -5px #FF3BD4;
+        display: none;
     }
 
     &__symbol {
@@ -398,6 +425,7 @@ export default {
     &__change {
         width: 100px;
         text-align: right;
+        position: relative;
     }
 
     &__span {

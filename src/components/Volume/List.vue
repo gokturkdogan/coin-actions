@@ -89,39 +89,44 @@
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price">
-                        <span class="list__currency">
+                        <span v-if="coin.liveKline" class="list__currency">
                             <Clock class="list__clock" />
                             {{ formatTime(coin.liveKline?.openTime) || '-' }}
                         </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price">
-                        <span class="list__currency">
+                        <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.high) || '-' }}
                         </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price">
-                        <span class="list__currency">
+                        <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.low) || '-' }}
                         </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price" :class="{ '-active': activeOrder === 'volume' }">
-                        <span class="list__currency">
+                        <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
                         </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price -colored"
                         :class="{ '-up': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0, '-down': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume < 0, '-active': activeOrder === 'change' }">
-                        <span class="list__currency">
+                        <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume -
                                 coin.previousKline?.quoteAssetVolume) }}
                             <ArrowUp v-if="coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0"
                                 class="list__icon" />
                             <ArrowDown v-else class="list__icon" />
                         </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price -colored"
                         :class="{ '-up': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0, '-down': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume < 0, '-active': activeOrder === 'percent' }">
-                        <span v-if="coin.liveKline" class="list__currency">
+                        <span v-if="coin.liveKline && coin.previousKline" class="list__currency">
                             {{ percentFormatter((coin.liveKline?.quoteAssetVolume -
                                 coin.previousKline?.quoteAssetVolume) * 100 / coin.previousKline?.quoteAssetVolume) }}%
                             <ArrowUp v-if="coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0"

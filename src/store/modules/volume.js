@@ -77,14 +77,13 @@ const actions = {
       const previousKlineRaw = klines[0];
       const previousKline = {
         openTime: previousKlineRaw[0],
-        open: previousKlineRaw[1],
-        high: previousKlineRaw[2],
-        low: previousKlineRaw[3],
-        close: previousKlineRaw[4],
-        volume: previousKlineRaw[5],
+        open: Number(previousKlineRaw[1]),
+        high: Number(previousKlineRaw[2]),
+        low: Number(previousKlineRaw[3]),
+        close: Number( previousKlineRaw[4]),
+        volume: Number(previousKlineRaw[5]),
         closeTime: previousKlineRaw[6],
-        quoteAssetVolume: previousKlineRaw[7],
-        numberOfTrades: previousKlineRaw[8],
+        quoteAssetVolume: Number(previousKlineRaw[7])
       };
 
       commit('setCoinData', { symbol, data: { previousKline } });
@@ -124,14 +123,13 @@ const actions = {
 
         const liveKline = {
           openTime: kline.t,
-          open: kline.o,
-          high: kline.h,
-          low: kline.l,
-          close: kline.c,
-          volume: kline.v,
+          open: Number(kline.o),
+          high: Number(kline.h),
+          low: Number(kline.l),
+          close: Number(kline.c),
+          volume: Number(kline.v),
           closeTime: kline.T,
           quoteAssetVolume: Number(kline.q),
-          numberOfTrades: kline.n,
           isFinal: kline.x,
         };
 

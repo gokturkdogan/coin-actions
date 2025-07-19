@@ -38,7 +38,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" v-for="coin in volumes" :key="coin.symbol">
+                <tr class="list__item" v-for="coin in volumes" :key="coin.symbol" :class="{ '-up': coin.isUp }">
                     <td class="list__name">
                         <span class="list__symbol">
                             {{ symbolFormatter(coin.symbol) }}
@@ -151,6 +151,7 @@ import Clock from '../../assets/images/icons/clock-icon.vue';
 import ArrowUp2 from '../../assets/images/icons/arrow-up-v2.vue';
 import ArrowDown2 from '../../assets/images/icons/arrow-down-v2.vue';
 import helpers from '../../mixins/helpers';
+
 export default {
     name: "spot-list",
     data() {
@@ -158,8 +159,9 @@ export default {
             inputFocused: false,
             searchText: '',
             destination: 'up',
-            activeOrder: 'volume'
-        }
+            activeOrder: 'volume',
+            previousVolumes: {} // symbol: previousQuoteAssetVolume
+        };
     },
     components: {
         DollarIcon,
@@ -171,7 +173,6 @@ export default {
         ArrowUp2,
         ArrowDown2
     },
-    created() { },
     mixins: [helpers],
     methods: {
         changeDestination(value) {
@@ -179,20 +180,40 @@ export default {
         },
         changeOrder(value) {
             this.activeOrder = value;
+        },
+        markIsUp(coin) {
+            if (!coin) return;
+
+            coin.isUp = true;
+            clearTimeout(coin._upTimer);
+            coin._upTimer = setTimeout(() => {
+                coin.isUp = false;
+            }, 1000); // 1 saniye sonra isUp: false yapılır
         }
     },
     computed: {
         volumes() {
             const data = this.$store.getters['volume/getCoinData'] || [];
 
-            return [...data].sort((a, b) => {
+            return [...data].map(coin => {
+                const symbol = coin.symbol;
+                const currentVolume = Number(coin?.liveKline?.quoteAssetVolume ?? 0);
+                const prevVolume = this.previousVolumes[symbol] ?? currentVolume;
+
+                if (currentVolume > prevVolume) {
+                    this.markIsUp(coin);
+                }
+
+                this.previousVolumes[symbol] = currentVolume;
+
+                return coin;
+            }).sort((a, b) => {
                 let valA = 0;
                 let valB = 0;
 
                 if (this.activeOrder === 'volume') {
                     valA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
                     valB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
-
                 } else if (this.activeOrder === 'change') {
                     const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
                     const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
@@ -201,7 +222,6 @@ export default {
                     const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
                     const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
                     valB = currentB - prevB;
-
                 } else if (this.activeOrder === 'percent') {
                     const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
                     const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
@@ -406,13 +426,8 @@ export default {
 
     &__item {
         &.-up {
-            background-color: rgba(0, 200, 0, 0.488);
-            transition: background-color 1s ease;
-        }
-
-        &.-down {
-            background-color: rgba(200, 0, 0, 0.488);
-            transition: background-color 1s ease;
+            background-color: rgba(0, 200, 0, 0.200);
+            transition: background-color 1.5s ease;
         }
     }
 

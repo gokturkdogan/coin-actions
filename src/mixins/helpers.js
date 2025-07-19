@@ -6,13 +6,25 @@ export default {
         },
         formatDecimal(value) {
             if (value === null || value === undefined || isNaN(value)) return '0';
-
             const num = parseFloat(value);
-
-            return num.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 4,
-            });
+            const isNegative = num < 0;
+            const absValue = Math.abs(num);
+            const numStr = absValue.toString();
+            if (absValue >= 1) {
+                const formatted = absValue.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 4,
+                });
+                return isNegative ? `-${formatted}` : formatted;
+            }
+            const match = numStr.match(/^0\.(0*)(\d{1,4})/);
+            if (match) {
+                const zeros = match[1];
+                const digits = match[2];
+                return `0.${zeros}${digits}`;
+            }
+            const fallback = absValue.toFixed(4);
+            return isNegative ? `-${fallback}` : fallback;
         },
         percentFormatter(value) {
             if (typeof value !== 'number') return '';

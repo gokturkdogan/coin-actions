@@ -130,7 +130,7 @@ const actions = {
           close: kline.c,
           volume: kline.v,
           closeTime: kline.T,
-          quoteAssetVolume: kline.q,
+          quoteAssetVolume: Number(kline.q),
           numberOfTrades: kline.n,
           isFinal: kline.x,
         };

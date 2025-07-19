@@ -6,25 +6,32 @@
                     @blur="inputFocused = false">
                 <Search />
             </div>
+            <div class="list__tab">
+                <ArrowUp2 v-if="destination === 'up'" @click="changeDestination('down')" />
+                <ArrowDown2 v-else @click="changeDestination('up')" />
+            </div>
             <h2 class="list__title">SAATLİK HACİM TAKİBİ</h2>
         </div>
         <table class="list__table">
             <thead>
                 <tr>
                     <th class="list__name">Coin</th>
-                    <th class="list__name">Açılış <span class="list__tooltip">Geçmiş 1 saatlik mum açılış saati</span></th>
-                    <th class="list__name"> Kapanış <span class="list__tooltip">Geçmiş 1 saatlik mum kapanış saati</span></th>
-                    <th class="list__name"> Açılış<span class="list__tooltip">Geçmiş 1 saatlik mum açılış fiyatı</span></th>
-                    <th class="list__name"> Kapanış<span class="list__tooltip">Geçmiş 1 saatlik mum kapanış fiyatı</span></th>
-                    <th class="list__name"> Yüksek<span class="list__tooltip">Geçmiş 1 saatlik mum en yüksek fiyat</span></th>
-                    <th class="list__name"> Düşük<span class="list__tooltip">Geçmiş 1 saatlik mum en düşük fiyat</span></th>
-                    <th class="list__name"> Hacim<span class="list__tooltip">Geçmiş 1 saatlik mum toplam hacim</span></th>
-                    <th class="list__name"> Trade<span class="list__tooltip">Geçmiş 1 saatlik mum yapılan toplam trade</span></th>
-                    <th class="list__name"> Açılış<span class="list__tooltip">Güncel 1 saatlik mum açılış saati</span></th>
-                    <th class="list__change"> Yüksek<span class="list__tooltip">Güncel 1 saatlik mum en yüksek fiyat</span></th>
-                    <th class="list__change"> Düşük<span class="list__tooltip">Güncel 1 saatlik mum en düşük fiyat</span></th>
-                    <th class="list__change"> Hacim<span class="list__tooltip">Güncel 1 saatlik mum anlık hacim</span></th>
-                    <th class="list__change"> Trade<span class="list__tooltip">Güncel 1 saatlik mum yapılan trade sayısı</span></th>
+                    <th class="list__name">Açılış<span class="list__tooltip">Geçmiş Mum Açılış Saati</span></th>
+                    <th class="list__name">Kapanış<span class="list__tooltip">Geçmiş Mum Kapanış Saati</span></th>
+                    <th class="list__name">Açılış<span class="list__tooltip">Geçmiş Mum Açılış Fiyatı</span></th>
+                    <th class="list__name">Kapanış<span class="list__tooltip">Geçmiş Mum Kapanış Fiyatı</span></th>
+                    <th class="list__name">Yüksek<span class="list__tooltip">Geçmiş Mum En Yüksek Fiyat</span></th>
+                    <th class="list__name">Düşük<span class="list__tooltip">Geçmiş Mum En Düşük Fiyat</span></th>
+                    <th class="list__name">Hacim<span class="list__tooltip">Geçmiş Mum Hacim</span></th>
+                    <th class="list__name">Açılış<span class="list__tooltip">Güncel Mum Açılış saati</span></th>
+                    <th class="list__change">Yüksek<span class="list__tooltip">Güncel Mum En Füksek Fiyat</span></th>
+                    <th class="list__change">Düşük<span class="list__tooltip">Güncel Mum En Düşük fiyat</span></th>
+                    <th class="list__change" @click="changeOrder('volume')"
+                        :class="{ '-active': activeOrder === 'volume' }">Hacim<span class="list__tooltip">Güncel Mum
+                            Anlık Hacim</span></th>
+                    <th class="list__change" @click="changeOrder('change')"
+                        :class="{ '-active': activeOrder === 'change' }">Değişim<span class="list__tooltip">1 Saatlik
+                            Hacim Değişimi</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -36,12 +43,14 @@
                     </td>
                     <td class="list__name">
                         <span v-if="coin.previousKline" class="list__symbol">
+                            <Clock class="list__clock" />
                             {{ formatTime(coin.previousKline.openTime) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__name">
                         <span v-if="coin.previousKline" class="list__symbol">
+                            <Clock class="list__clock -red" />
                             {{ formatTime(coin.previousKline.closeTime) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
@@ -77,13 +86,8 @@
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
                     <td class="list__price">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            {{ coin.previousKline.numberOfTrades }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>                    
-                    <td class="list__price">
                         <span class="list__currency">
+                            <Clock class="list__clock" />
                             {{ formatTime(coin.liveKline?.openTime) || '-' }}
                         </span>
                     </td>
@@ -91,20 +95,25 @@
                         <span class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.high) || '-' }}
                         </span>
-                    </td>                    
+                    </td>
                     <td class="list__price">
                         <span class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.low) || '-' }}
                         </span>
                     </td>
-                    <td class="list__price">
+                    <td class="list__price" :class="{ '-active': activeOrder === 'volume' }">
                         <span class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
                         </span>
-                    </td>                    
-                    <td class="list__price">
+                    </td>
+                    <td class="list__price -colored"
+                        :class="{ '-up': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0, '-down': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume < 0, '-active': activeOrder === 'change' }">
                         <span class="list__currency">
-                            {{ coin.liveKline?.numberOfTrades || '-' }}
+                            <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume -
+                                coin.previousKline?.quoteAssetVolume) }}
+                            <ArrowUp v-if="coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0"
+                                class="list__icon" />
+                            <ArrowDown v-else class="list__icon" />
                         </span>
                     </td>
                 </tr>
@@ -119,13 +128,18 @@ import ArrowUp from '../../assets/images/icons/arrow-up-icon.vue';
 import ArrowDown from '../../assets/images/icons/arrow-down-icon.vue';
 import UpDown from '../../assets/images/icons/up-down-icon.vue';
 import Search from '../../assets/images/icons/search-icon.vue';
+import Clock from '../../assets/images/icons/clock-icon.vue';
+import ArrowUp2 from '../../assets/images/icons/arrow-up-v2.vue';
+import ArrowDown2 from '../../assets/images/icons/arrow-down-v2.vue';
 import helpers from '../../mixins/helpers';
 export default {
     name: "spot-list",
     data() {
         return {
             inputFocused: false,
-            searchText: ''
+            searchText: '',
+            destination: 'up',
+            activeOrder: 'volume'
         }
     },
     components: {
@@ -133,15 +147,51 @@ export default {
         ArrowUp,
         ArrowDown,
         UpDown,
-        Search
+        Search,
+        Clock,
+        ArrowUp2,
+        ArrowDown2
     },
     created() { },
     mixins: [helpers],
-    methods: {},
-    computed: {
-        volumes() {
-            return this.$store.getters['volume/getCoinData']
+    methods: {
+        changeDestination(value) {
+            this.destination = value;
+        },
+        changeOrder(value) {
+            this.activeOrder = value;
         }
+    },
+    computed: {
+    volumes() {
+        const data = this.$store.getters['volume/getCoinData'] || [];
+
+        return [...data].sort((a, b) => {
+            let valA = 0;
+            let valB = 0;
+
+            if (this.activeOrder === 'volume') {
+                valA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
+                valB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
+            } else if (this.activeOrder === 'change') {
+                const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
+                const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
+                valA = currentA - prevA;
+
+                const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
+                const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
+                valB = currentB - prevB;
+            }
+
+            if (isNaN(valA) && isNaN(valB)) return 0;
+            if (isNaN(valA)) return 1;
+            if (isNaN(valB)) return -1;
+
+            return this.destination === 'down'
+                ? valA - valB
+                : valB - valA;
+        });
+}
     }
 };
 </script>
@@ -235,15 +285,6 @@ export default {
         width: 20px;
     }
 
-    &__tabs {
-        display: flex;
-        gap: 10px;
-        position: absolute;
-        right: 0;
-        transform: translateY(-50%);
-        top: 50%;
-    }
-
     &__tab {
         display: flex;
         align-items: center;
@@ -255,24 +296,14 @@ export default {
         border-radius: 10px;
         transition: 0.3s;
         color: #ffffff;
-
-        svg {
-            margin: 0;
-        }
+        transform: translateY(-50%);
+        top: 50%;
+        left: 250px;
+        position: absolute;
 
         &:hover {
             border-color: #FF3BD4;
             box-shadow: 0 0 26px -5px #FF3BD4;
-
-            svg {
-                fill: #FF3BD4;
-            }
-        }
-
-        &.-active {
-            border-color: #FF3BD4;
-            box-shadow: 0 0 26px -5px #FF3BD4;
-            color: #FF3BD4;
 
             svg {
                 fill: #FF3BD4;
@@ -305,10 +336,12 @@ export default {
 
             th {
                 cursor: pointer;
+
                 &:hover {
                     box-shadow: 0 0 26px -5px #FF3BD4;
                     color: #FF3BD4;
                 }
+
                 &:hover .list__tooltip {
                     display: block;
                 }
@@ -393,6 +426,16 @@ export default {
 
     }
 
+    &__clock {
+        height: 15px;
+        width: 15px;
+        margin-right: 5px;
+
+        &.-red {
+            fill: #ff4d4d;
+        }
+    }
+
     &__cur {
         font-size: 12px;
         margin-left: 5px;
@@ -412,6 +455,10 @@ export default {
         align-items: center;
     }
 
+    &__icon {
+        margin-left: 10px;
+    }
+
     &__img {
         width: 20px;
         margin-right: 10px;
@@ -420,6 +467,16 @@ export default {
     &__price {
         width: 200px;
         text-align: right;
+
+        &.-colored {
+            &.-up {
+                color: #6ccf59;
+            }
+
+            &.-down {
+                color: #ff4d4d;
+            }
+        }
     }
 
     &__change {

@@ -30,8 +30,11 @@
                         :class="{ '-active': activeOrder === 'volume' }">Hacim<span class="list__tooltip">Güncel Mum
                             Anlık Hacim</span></th>
                     <th class="list__change" @click="changeOrder('change')"
-                        :class="{ '-active': activeOrder === 'change' }">Değişim<span class="list__tooltip">1 Saatlik
+                        :class="{ '-active': activeOrder === 'change' }">$ Değişim<span class="list__tooltip">1 Saatlik
                             Hacim Değişimi</span></th>
+                    <th class="list__change" @click="changeOrder('percent')"
+                        :class="{ '-active': activeOrder === 'percent' }">% Değişim<span class="list__tooltip">1 Saatlik
+                            Hacim Yüzdelik Değişimi</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -116,6 +119,17 @@
                             <ArrowDown v-else class="list__icon" />
                         </span>
                     </td>
+                    <td class="list__price -colored"
+                        :class="{ '-up': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0, '-down': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume < 0, '-active': activeOrder === 'percent' }">
+                        <span v-if="coin.liveKline" class="list__currency">
+                            {{ percentFormatter((coin.liveKline?.quoteAssetVolume -
+                                coin.previousKline?.quoteAssetVolume) * 100 / coin.previousKline?.quoteAssetVolume) }}%
+                            <ArrowUp v-if="coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0"
+                                class="list__icon" />
+                            <ArrowDown v-else class="list__icon" />
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -163,35 +177,45 @@ export default {
         }
     },
     computed: {
-    volumes() {
-        const data = this.$store.getters['volume/getCoinData'] || [];
+        volumes() {
+            const data = this.$store.getters['volume/getCoinData'] || [];
 
-        return [...data].sort((a, b) => {
-            let valA = 0;
-            let valB = 0;
+            return [...data].sort((a, b) => {
+                let valA = 0;
+                let valB = 0;
 
-            if (this.activeOrder === 'volume') {
-                valA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
-                valB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
-            } else if (this.activeOrder === 'change') {
-                const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
-                const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
-                valA = currentA - prevA;
+                if (this.activeOrder === 'volume') {
+                    valA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
+                    valB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
 
-                const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
-                const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
-                valB = currentB - prevB;
-            }
+                } else if (this.activeOrder === 'change') {
+                    const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
+                    const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
+                    valA = currentA - prevA;
 
-            if (isNaN(valA) && isNaN(valB)) return 0;
-            if (isNaN(valA)) return 1;
-            if (isNaN(valB)) return -1;
+                    const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
+                    const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
+                    valB = currentB - prevB;
 
-            return this.destination === 'down'
-                ? valA - valB
-                : valB - valA;
-        });
-}
+                } else if (this.activeOrder === 'percent') {
+                    const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
+                    const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
+                    valA = prevA !== 0 ? ((currentA - prevA) / prevA) * 100 : 0;
+
+                    const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
+                    const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
+                    valB = prevB !== 0 ? ((currentB - prevB) / prevB) * 100 : 0;
+                }
+
+                if (isNaN(valA) && isNaN(valB)) return 0;
+                if (isNaN(valA)) return 1;
+                if (isNaN(valB)) return -1;
+
+                return this.destination === 'down'
+                    ? valA - valB
+                    : valB - valA;
+            });
+        }
     }
 };
 </script>
@@ -350,7 +374,7 @@ export default {
 
         th,
         td {
-            padding: 20px 10px;
+            padding: 25px 5px;
             border: none;
             outline: none;
 
@@ -393,7 +417,6 @@ export default {
     }
 
     &__name {
-        width: 270px;
         text-align: left;
         position: relative;
     }

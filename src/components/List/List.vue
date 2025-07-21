@@ -11,6 +11,7 @@
         />
         <Search />
       </div>
+      <span class="list__info">Lütfen detayını görmek istediğiniz coin sembolüne tıklayınız</span>
       <h2 class="list__title">TÜM COINLER</h2>
       <div class="list__tabs">
         <div
@@ -312,6 +313,14 @@ export default {
             background-image: radial-gradient(#5349CA, transparent);
             left: 0;
         }
+    }
+
+    &__info {
+      position: absolute;
+      color: #b9b9b9;
+      transform: translateY(-50%);
+      top: 50%;
+      left: 220px;
     }
 
     &__tabs {

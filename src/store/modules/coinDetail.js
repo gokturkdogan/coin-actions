@@ -1,237 +1,154 @@
-import axios from 'axios';
-import dayjs from 'dayjs';
-
 const coinDetail = {
   namespaced: true,
+
   state: () => ({
-    coinSymbol: null,
-    tickerData: null,
-    depthData: { bids: [], asks: [] },
-    historicalVolumes: { weekly: null, monthly: null, quarterly: null },
-    klineData: [],
-    trades: [],
-    socketTicker: null,
-    socketDepth: null,
-    socketTrades: null,
+    symbol: null,
+    tickerSocket: null,
+    klineSocket: null,
+    price: null,
+    priceChange: null,
+    priceChangePercent: null,
+    highPrice: null,
+    lowPrice: null,
+    quoteVolume: null,
+    quoteVolume1h: null, // Aktif mumun hacmi (1h kline)
+    oldVolumes: [], // Son 11 saatin hacmi ve kapanış zamanı
   }),
 
   mutations: {
-    setCoinSymbol(state, symbol) {
-      state.coinSymbol = symbol;
+    SET_SYMBOL(state, symbol) {
+      state.symbol = symbol;
     },
-    setTickerData(state, data) {
-      state.tickerData = data;
+    SET_TICKER_SOCKET(state, socket) {
+      state.tickerSocket = socket;
     },
-    setDepthData(state, { bids, asks }) {
-      state.depthData = {
-        bids: [...bids],
-        asks: [...asks],
-      };
+    SET_KLINE_SOCKET(state, socket) {
+      state.klineSocket = socket;
     },
-    setHistoricalVolumes(state, { weekly, monthly, quarterly }) {
-      state.historicalVolumes = { weekly, monthly, quarterly };
+    SET_TICKER_DATA(state, data) {
+      state.price = Number(data.c);
+      state.priceChange = Number(data.p);
+      state.priceChangePercent = Number(data.P);
+      state.highPrice = Number(data.h);
+      state.lowPrice = Number(data.l);
+      state.quoteVolume = Number(data.q);
     },
-    setKlineData(state, data) {
-      state.klineData = data;
+    SET_QUOTE_VOLUME_1H(state, klineData) {
+      const quoteVolume = Number(klineData.k.q); // Aktif mumun quoteVolume'u
+      state.quoteVolume1h = quoteVolume;
     },
-    setTrades(state, trades) {
-      state.trades = trades;
+    SET_OLD_VOLUMES(state, volumes) {
+      state.oldVolumes = volumes;
     },
-    setSocketTicker(state, socket) {
-      state.socketTicker = socket;
-    },
-    setSocketDepth(state, socket) {
-      state.socketDepth = socket;
-    },
-    setSocketTrades(state, socket) {
-      state.socketTrades = socket;
-    },
-    clearSockets(state) {
-      if (state.socketTicker) state.socketTicker.close();
-      if (state.socketDepth) state.socketDepth.close();
-      if (state.socketTrades) state.socketTrades.close();
-      state.socketTicker = null;
-      state.socketDepth = null;
-      state.socketTrades = null;
-    },
-    clearSocketTrades(state) {
-      if (state.socketTrades) {
-        state.socketTrades.close();
-        state.socketTrades = null;
+    CLOSE_TICKER_SOCKET(state) {
+      if (state.tickerSocket) {
+        console.log(`[coinDetail][${state.symbol}] Ticker socket closing...`);
+        state.tickerSocket.close();
+        state.tickerSocket = null;
       }
     },
+    CLOSE_KLINE_SOCKET(state) {
+      if (state.klineSocket) {
+        console.log(`[coinDetail][${state.symbol}] Kline socket closing...`);
+        state.klineSocket.close();
+        state.klineSocket = null;
+      }
+    }
   },
 
   actions: {
-    async openCoinDetail({ commit, dispatch }, symbol) {
-      commit('clearSockets');
-      commit('setCoinSymbol', symbol);
-      await Promise.all([
-        dispatch('fetchHistoricalVolumes', symbol),
-        dispatch('fetchKlineData', symbol),
-      ]);
-      dispatch('connectTickerSocket', symbol);
-      dispatch('connectDepthSocket', symbol);
-      dispatch('connectTradesSocket', symbol);
-    },
+    connectTickerSocket({ commit, state }, symbol) {
+      commit('CLOSE_TICKER_SOCKET');
+      commit('SET_SYMBOL', symbol);
 
-    async fetchHistoricalVolumes({ commit }, symbol) {
-      const symbolQuery = `${symbol.toUpperCase()}USDT`;
-      try {
-        const response = await axios.get('https://api.binance.com/api/v3/klines', {
-          params: { symbol: symbolQuery, interval: '1d', limit: 90 }
-        });
-        const volumes = response.data.map(entry => parseFloat(entry[7]));
-        const weekly = volumes.slice(-7).reduce((a, b) => a + b, 0);
-        const monthly = volumes.slice(-30).reduce((a, b) => a + b, 0);
-        const quarterly = volumes.reduce((a, b) => a + b, 0);
+      const wsSymbol = symbol.toLowerCase();
+      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${wsSymbol}@ticker`);
 
-        commit('setHistoricalVolumes', {
-          weekly: weekly.toFixed(2),
-          monthly: monthly.toFixed(2),
-          quarterly: quarterly.toFixed(2),
-        });
-      } catch (error) {
-        console.error('Historical volume fetch error:', error);
-      }
-    },
+      socket.onopen = () => {
+        console.log(`[coinDetail][${symbol}] Ticker socket opened.`);
+      };
 
-    async fetchKlineData({ commit }, symbol) {
-      const symbolQuery = `${symbol.toUpperCase()}USDT`;
-      try {
-        const response = await axios.get('https://api.binance.com/api/v3/klines', {
-          params: { symbol: symbolQuery, interval: '1h', limit: 100 }
-        });
-        const klineData = response.data.map(entry => ({
-          time: entry[0],
-          open: parseFloat(entry[1]),
-          high: parseFloat(entry[2]),
-          low: parseFloat(entry[3]),
-          close: parseFloat(entry[4]),
-          volume: parseFloat(entry[5])
-        }));
-        commit('setKlineData', klineData);
-      } catch (error) {
-        console.error('Kline data fetch error:', error);
-      }
-    },
-    async fetchHistoricalTradesByRange({ commit }, { symbol, hours }) {
-      commit('clearSocketTrades');
-
-      const symbolQuery = `${symbol.toUpperCase()}USDT`;
-      const endTime = Date.now();
-      const allTrades = [];
-
-      // Her saatlik aralık için ayrı istek at
-      for (let i = hours; i > 0; i--) {
-        const rangeEnd = endTime - (i - 1) * 60 * 60 * 1000;
-        const rangeStart = rangeEnd - 60 * 60 * 1000;
-
-        try {
-          const response = await axios.get('https://api.binance.com/api/v3/aggTrades', {
-            params: {
-              symbol: symbolQuery,
-              startTime: rangeStart,
-              endTime: rangeEnd,
-              limit: 1000
-            }
-          });
-
-          const trades = response.data.map(t => {
-            const price = parseFloat(t.p);
-            const qty = parseFloat(t.q);
-            const total = price * qty;
-            return {
-              price: price.toFixed(2),
-              qty: qty.toFixed(4),
-              total: total,
-              time: dayjs(t.T).format('HH:mm:ss'),
-              type: t.m ? 'sell' : 'buy'
-            };
-          });
-
-          allTrades.push(...trades);
-
-        } catch (error) {
-          console.error(`${hours} saatlik trade verisi (saat ${i}) alınırken hata:`, error);
-        }
-      }
-
-      // Hepsini birleştir, büyükten küçüğe sırala, ilk 40'ı al
-      const sorted = allTrades
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 40);
-
-      commit('setTrades', sorted);
-    },
-
-    connectTickerSocket({ commit }, symbol) {
-      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}usdt@ticker`);
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        commit('setTickerData', {
-          lastPrice: parseFloat(data.c).toFixed(2),
-          changePercent: parseFloat(data.P).toFixed(2),
-          changeAmount: Number(data.p).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 4
-          }),
-          volume24h: parseFloat(data.q).toFixed(2),
-          high24h: parseFloat(data.h).toFixed(2),
-          low24h: parseFloat(data.l).toFixed(2),
-        });
+        commit('SET_TICKER_DATA', data);
       };
-      socket.onerror = (err) => console.error('Ticker socket error:', err);
-      commit('setSocketTicker', socket);
+
+      socket.onerror = (error) => {
+        console.error(`[coinDetail][${symbol}] Ticker socket error:`, error);
+      };
+
+      socket.onclose = () => {
+        console.log(`[coinDetail][${symbol}] Ticker socket closed.`);
+      };
+
+      commit('SET_TICKER_SOCKET', socket);
     },
 
-    connectDepthSocket({ commit, state }, symbol) {
-      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}usdt@depth20@100ms`);
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          const bids = data.bids;
-          const asks = data.asks;
-          commit('setDepthData', { bids, asks });
-        } catch (err) {
-          console.error('Depth data error:', err);
-        }
-      };
-      socket.onerror = (err) => console.error('Depth socket error:', err);
-      commit('setSocketDepth', socket);
-    },
+    connectKlineSocket({ commit, state }, symbol) {
+      commit('CLOSE_KLINE_SOCKET');
+      const wsSymbol = symbol.toLowerCase();
+      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${wsSymbol}@kline_1h`);
 
-    connectTradesSocket({ commit }, symbol) {
-      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}usdt@trade`);
-      const trades = [];
+      socket.onopen = () => {
+        console.log(`[coinDetail][${symbol}] Kline socket opened.`);
+      };
+
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        trades.unshift({
-          price: parseFloat(data.p).toFixed(2),
-          qty: parseFloat(data.q).toFixed(4),
-          time: dayjs(data.T).format('HH:mm:ss'),
-          type: data.m ? 'sell' : 'buy'
-        });
-        if (trades.length > 40) trades.pop();
-        commit('setTrades', [...trades]);
+        commit('SET_QUOTE_VOLUME_1H', data);
       };
-      socket.onerror = (err) => console.error('Trades socket error:', err);
-      commit('setSocketTrades', socket);
+
+      socket.onerror = (error) => {
+        console.error(`[coinDetail][${symbol}] Kline socket error:`, error);
+      };
+
+      socket.onclose = () => {
+        console.log(`[coinDetail][${symbol}] Kline socket closed.`);
+      };
+
+      commit('SET_KLINE_SOCKET', socket);
     },
 
-    closeCoinDetail({ commit }) {
-      commit('clearSockets');
-      console.log('detail Socket kapandı');
+    async fetchOldVolumes({ commit }, symbol) {
+      if (!symbol) return;
+      const upperSymbol = symbol.toUpperCase();
+      const limit = 12;
+      try {
+        const response = await fetch(
+          `https://api.binance.com/api/v3/klines?symbol=${upperSymbol}&interval=1h&limit=${limit}`
+        );
+        const data = await response.json();
+
+        // Son elemanı atla (aktif mum)
+        const volumes = data
+          .slice(0, data.length - 1)  // son eleman hariç
+          .map(item => ({
+            closeTime: item[6],          // Kapanış zamanı (ms cinsinden)
+            quoteVolume: Number(item[7]) // Hacim (USDT cinsinden)
+          }));
+
+        commit('SET_OLD_VOLUMES', volumes);
+      } catch (error) {
+        console.error(`[coinDetail][${upperSymbol}] fetchOldVolumes error:`, error);
+        commit('SET_OLD_VOLUMES', []);
+      }
     },
+
+    disconnectSockets({ commit }) {
+      commit('CLOSE_TICKER_SOCKET');
+      commit('CLOSE_KLINE_SOCKET');
+    }
   },
 
   getters: {
-    coinSymbol: state => state.coinSymbol,
-    tickerData: state => state.tickerData,
-    depthData: state => state.depthData,
-    historicalVolumes: state => state.historicalVolumes,
-    klineData: state => state.klineData,
-    trades: state => state.trades,
+    getPrice: state => state.price,
+    getPriceChange: state => state.priceChange,
+    getPriceChangePercent: state => state.priceChangePercent,
+    getHighPrice: state => state.highPrice,
+    getLowPrice: state => state.lowPrice,
+    getQuoteVolume: state => state.quoteVolume,
+    getQuoteVolume1h: state => state.quoteVolume1h,
+    getOldVolumes: state => state.oldVolumes
   }
 };
 

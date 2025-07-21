@@ -2,7 +2,8 @@
   <div class="detail">
     <img class="detail__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="detail__header">
-      <Header v-if="tickerData && oldVolumes" :coin-symbol="coinSymbol" :ticker-data="tickerData" :old-volumes="oldVolumes" />
+      <Header v-if="isReady" :coin-symbol="symbol"/>
+      <Volumes v-if="isReady"/>
     </div>
     <div class="detail__content">
       <Orders v-if="depthData && tickerData" :depth-data="depthData"  :last-price="tickerData.lastPrice" />
@@ -13,16 +14,20 @@
 </template>
 
 <script>
+import Volumes from '../components/Detail/Volumes.vue';
 import Header from '../components/Detail/Header.vue';
 import Orders from '../components/Detail/Orders.vue';
 import Trades from '../components/Detail/Trades.vue';
 export default {
   name: "list",
   data() {
-    return {}
+    return {
+      isReady: false
+    }
   },
   components: {
     Header,
+    Volumes,
     Orders,
     Trades
   },
@@ -32,11 +37,14 @@ export default {
       required: true
     }
   },
-  created() {
-    //this.$store.dispatch('coinDetail/openCoinDetail', symbol);
+  async created() {
+    await this.$store.dispatch('coinDetail/connectTickerSocket', this.symbol);
+    await this.$store.dispatch('coinDetail/connectKlineSocket', this.symbol);
+    await this.$store.dispatch('coinDetail/fetchOldVolumes', this.symbol);
+    this.isReady = true;
   },
   beforeUnmount() {
-    this.$store.dispatch('coinDetail/closeCoinDetail');
+    this.$store.dispatch('coinDetail/disconnectSockets');
   },
   methods: {
 
@@ -72,7 +80,10 @@ export default {
     }
 
     &__header {
+      display: flex;
+      flex-direction: column;
       padding: 0 100px;
+      gap: 20px;
     }
 
     &__content {

@@ -1,110 +1,103 @@
 <template>
-    <div class="header">
-        <div class="header__item -symbol">{{ coinSymbol }} / USD</div>
-        <div class="header__item -symbol">
-            ${{ formatNumber(tickerData.lastPrice, 2) }}
+    <div class="volumes">
+        <div class="volumes__item -symbol">{{ symbolFormatter(coinSymbol) }} / USD</div>
+        <div class="volumes__item -symbol"
+            :class="{ '-up': priceDirection === 'up', '-down': priceDirection === 'down' }">
+            ${{ formatDecimal(price) }}
+            <ArrowUpIcon class="volumes__icon" v-if="priceDirection === 'up'" />
+            <ArrowDownIcon class="volumes__icon" v-else />
         </div>
-        <div class="header__item" :class="{ '-up': tickerData.changePercent > 0, '-down': tickerData.changePercent < 0 }">
-            <span class="header__title">
+        <div class="volumes__item">
+            <span class="volumes__title">
                 24 saatlik Değişim
             </span>
-            <span class="header__text" :class="{ '-up': tickerData.changePercent > 0, '-down': tickerData.changePercent < 0 }">
-                {{ tickerData.changePercent }} %
-                {{ tickerData.changeAmount }} $
+            <span class="volumes__text" :class="{ '-up': priceChangePercent > 0, '-down': priceChangePercent < 0 }">
+                {{ percentFormatter(priceChangePercent) }} %
+                {{ formatDecimal(priceChange) }} $
+                <ArrowUpIcon class="volumes__icon" v-if="priceChangePercent > 0" />
+                <ArrowDownIcon class="volumes__icon" v-else />
             </span>
         </div>
-        <div class="header__item">
-            <span class="header__title">
+        <div class="volumes__item">
+            <span class="volumes__title">
                 24s En Yüksek
             </span>
-            <span class="header__text">
-                ${{ formatNumber(tickerData.high24h, 2) }}
+            <span class="volumes__text -up">
+                ${{ formatDecimal(highPrice) }}
             </span>
         </div>
-        <div class="header__item">
-            <span class="header__title">
+        <div class="volumes__item">
+            <span class="volumes__title">
                 24s En Düşük
             </span>
-            <span class="header__text">
-                ${{ formatNumber(tickerData.low24h, 2) }}
-            </span>
-        </div>
-        <div class="header__item">
-            <span class="header__title">
-                24s Hacim
-            </span>
-            <span class="header__text">
-                ${{ formatNumber(tickerData.volume24h, 2) }}
-            </span>
-        </div>
-        <div class="header__item">
-            <span class="header__title">
-                Haftalık Hacim
-            </span>
-            <span class="header__text">
-                ${{ formatNumber(oldVolumes.weekly, 2) }}
-            </span>
-        </div>
-        <div class="header__item">
-            <span class="header__title">
-                Aylık Hacim
-            </span>
-            <span class="header__text">
-                ${{ formatNumber(oldVolumes.monthly, 2) }}
-            </span>
-        </div>
-        <div class="header__item">
-            <span class="header__title">
-                3 Aylık Hacim
-            </span>
-            <span class="header__text">
-                ${{ formatNumber(oldVolumes.quarterly, 2) }}
+            <span class="volumes__text -down">
+                ${{ formatDecimal(lowPrice) }}
             </span>
         </div>
     </div>
 </template>
 
 <script>
+import helpers from '../../mixins/helpers';
+import ArrowUpIcon from '../../assets/images/icons/arrow-up-icon.vue';
+import ArrowDownIcon from '../../assets/images/icons/arrow-down-icon.vue';
+import CircleEmptyIcon from '../../assets/images/icons/circle-empty-icon.vue';
+
 
 export default {
-    name: "detail-header",
+    name: "detail-volumes",
     data() {
         return {
-            isReady: false
+            priceDirection: null
         }
     },
     props: {
         coinSymbol: {
             type: String,
             required: true
-        },
-        tickerData: {
-            type: Object,
-            required: true
-        },
-        oldVolumes: {
-            type: Object,
-            required: true
-        } 
-    },
-    components: {},
-    created() {
-        setTimeout(() => {
-            this.isReady = true
-        }, 3000);
-    },
-    methods: {
-        formatNumber(value, decimals = 4) {
-            if (isNaN(value)) return value;
-            const parts = Number(value).toFixed(decimals).split('.');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            return parts.join('.');
         }
     },
+    mixins: [helpers],
+    components: {
+        ArrowUpIcon,
+        ArrowDownIcon,
+        CircleEmptyIcon
+    },
+    created() { },
+    watch: {
+        price(newVal, oldVal) {
+            if (oldVal === null || oldVal === undefined) return; // ilk değer atlama
+            if (newVal > oldVal) {
+                this.priceDirection = 'up';
+            } else if (newVal < oldVal) {
+                this.priceDirection = 'down';
+            } else {
+                this.priceDirection = null;
+            }
+        }
+    },
+    methods: {},
+    computed: {
+        price() {
+            return this.$store.getters['coinDetail/getPrice'];
+        },
+        priceChange() {
+            return this.$store.getters['coinDetail/getPriceChange'];
+        },
+        priceChangePercent() {
+            return this.$store.getters['coinDetail/getPriceChangePercent'];
+        },
+        highPrice() {
+            return this.$store.getters['coinDetail/getHighPrice'];
+        },
+        lowPrice() {
+            return this.$store.getters['coinDetail/getLowPrice'];
+        }
+    }
 };
 </script>
 <style lang="scss" scoped>
-.header {
+.volumes {
     padding: 10px;
     display: flex;
     color: #ffffff;
@@ -118,30 +111,47 @@ export default {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        font-size: 15px;
+        font-size: 20px;
         cursor: pointer;
+
+        &.-up {
+            color: #00ff00;
+        }
+
+        &.-down {
+            color: #ff0000;
+        }
 
         &:hover {
             color: #FF3BD4;
         }
 
         &.-symbol {
-            font-size: 20px;
+            flex-direction: row;
+            font-size: 24px;
         }
     }
 
     &__title {
-        font-size: 11px;
+        font-size: 14px;
         color: #d1d1d1;
     }
 
     &__text {
+        display: flex;
+        align-items: center;
+
         &.-up {
             color: #00ff00;
         }
+
         &.-down {
             color: #ff0000;
         }
+    }
+
+    &__icon {
+        margin-left: 5px;
     }
 }
 </style>

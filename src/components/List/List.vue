@@ -66,9 +66,8 @@
           class="list__item"
           v-for="(coin, index) in coins"
           :key="coin.symbol"
-          @click="goDetail(coin)"
         >
-          <td class="list__number">{{ symbolFormatter(coin.symbol) }}</td>
+          <td class="list__number"> <router-link :to="'/coin-actions/coin-detail/' + coin.symbol" class="list__link">{{ symbolFormatter(coin.symbol) }}</router-link></td>
           <td class="list__name" :class="{ '-active': sortField === 'lastPrice' }">
             <span class="list__symbol">
               <DollarIcon />{{ formatDecimal(coin.lastPrice) }}
@@ -489,6 +488,11 @@ export default {
             background-color: rgba(240, 41, 52, 0.3);
             color: #ff4d4d;
         }
+    }
+
+    &__link {
+      color: #b9b9b9;
+      text-decoration: none;
     }
 }
 </style>

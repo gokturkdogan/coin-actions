@@ -6,6 +6,7 @@ const coinDetail = {
     tickerSocket: null,
     klineSocket: null,
     orderBookSocket: null,
+    aggTradeSocket: null,   // AggTrade socket için state
     price: null,
     priceChange: null,
     priceChangePercent: null,
@@ -15,7 +16,8 @@ const coinDetail = {
     quoteVolume1h: null,
     oldVolumes: [],
     bids: [],
-    asks: []
+    asks: [],
+    trades: []  // Son gerçekleşen agregate trade'ler burada tutulacak
   }),
 
   mutations: {
@@ -30,6 +32,9 @@ const coinDetail = {
     },
     SET_ORDERBOOK_SOCKET(state, socket) {
       state.orderBookSocket = socket;
+    },
+    SET_AGGTRADE_SOCKET(state, socket) {
+      state.aggTradeSocket = socket;
     },
     SET_TICKER_DATA(state, data) {
       state.price = Number(data.c);
@@ -49,6 +54,15 @@ const coinDetail = {
     SET_ORDERBOOK_DATA(state, data) {
       state.bids = data.bids.slice(0, 20).map(item => [Number(item[0]), Number(item[1])]);
       state.asks = data.asks.slice(0, 20).map(item => [Number(item[0]), Number(item[1])]);
+    },
+    SET_TRADES(state, trades) {
+      state.trades = trades;
+    },
+    ADD_TRADE(state, trade) {
+      state.trades.unshift(trade);
+      if (state.trades.length > 100) {
+        state.trades.pop();
+      }
     },
     CLOSE_TICKER_SOCKET(state) {
       if (state.tickerSocket) {
@@ -70,8 +84,16 @@ const coinDetail = {
         state.orderBookSocket.close();
         state.orderBookSocket = null;
       }
+    },
+    CLOSE_AGGTRADE_SOCKET(state) {
+      if (state.aggTradeSocket) {
+        console.log(`[coinDetail][${state.symbol}] AggTrade socket closing...`);
+        state.aggTradeSocket.close();
+        state.aggTradeSocket = null;
+      }
     }
   },
+
   actions: {
     connectTickerSocket({ commit, state }, symbol) {
       commit('CLOSE_TICKER_SOCKET');
@@ -131,6 +153,31 @@ const coinDetail = {
       };
       commit('SET_ORDERBOOK_SOCKET', socket);
     },
+    connectAggTradeSocket({ commit, state }, symbol) {
+      commit('CLOSE_AGGTRADE_SOCKET');
+      const wsSymbol = symbol.toLowerCase();
+      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${wsSymbol}@aggTrade`);
+      socket.onopen = () => {
+        console.log(`[coinDetail][${symbol}] AggTrade socket opened.`);
+      };
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const trade = {
+          price: Number(data.p),
+          quantity: Number(data.q),
+          timestamp: data.T,
+          type: data.m ? 'sell' : 'buy'
+        };
+        commit('ADD_TRADE', trade);
+      };
+      socket.onerror = (error) => {
+        console.error(`[coinDetail][${symbol}] AggTrade socket error:`, error);
+      };
+      socket.onclose = () => {
+        console.log(`[coinDetail][${symbol}] AggTrade socket closed.`);
+      };
+      commit('SET_AGGTRADE_SOCKET', socket);
+    },
     async fetchOldVolumes({ commit }, symbol) {
       if (!symbol) return;
       const upperSymbol = symbol.toUpperCase();
@@ -146,7 +193,6 @@ const coinDetail = {
             closeTime: item[6],
             quoteVolume: Number(item[7])
           }));
-
         commit('SET_OLD_VOLUMES', volumes);
       } catch (error) {
         console.error(`[coinDetail][${upperSymbol}] fetchOldVolumes error:`, error);
@@ -157,8 +203,10 @@ const coinDetail = {
       commit('CLOSE_TICKER_SOCKET');
       commit('CLOSE_KLINE_SOCKET');
       commit('CLOSE_ORDERBOOK_SOCKET');
+      commit('CLOSE_AGGTRADE_SOCKET');
     }
   },
+
   getters: {
     getPrice: state => state.price,
     getPriceChange: state => state.priceChange,
@@ -170,6 +218,7 @@ const coinDetail = {
     getOldVolumes: state => state.oldVolumes,
     getBids: state => state.bids,
     getAsks: state => state.asks,
+    getTrades: state => state.trades,
   }
 };
 

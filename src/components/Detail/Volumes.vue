@@ -67,20 +67,6 @@ export default {
             isReady: false
         }
     },
-    props: {
-        coinSymbol: {
-            type: String,
-            required: true
-        },
-        tickerData: {
-            type: Object,
-            required: true
-        },
-        oldVolumes: {
-            type: Object,
-            required: true
-        }
-    },
     mixins: [helpers],
     components: {
         DollarIcon
@@ -88,21 +74,6 @@ export default {
     created() { },
     methods: {},
     computed: {
-        price() {
-            return this.$store.getters['coinDetail/getPrice'];
-        },
-        priceChange() {
-            return this.$store.getters['coinDetail/getPriceChange'];
-        },
-        priceChangePercent() {
-            return this.$store.getters['coinDetail/getPriceChangePercent'];
-        },
-        highPrice() {
-            return this.$store.getters['coinDetail/getHighPrice'];
-        },
-        lowPrice() {
-            return this.$store.getters['coinDetail/getLowPrice'];
-        },
         volume24h() {
             return this.$store.getters['coinDetail/getQuoteVolume'];
         },

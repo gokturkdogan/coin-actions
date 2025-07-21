@@ -83,6 +83,7 @@ export default {
     background-color: #31324f;
     font-size: 12px;
     border-radius: 10px;
+    height: fit-content;
 
     &__sell {
         display: flex;

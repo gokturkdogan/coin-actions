@@ -7,7 +7,7 @@
     </div>
     <div class="detail__content">
       <Orders v-if="isReady" :coin-symbol="symbol"/>
-      <Trades v-if="trades" :trades="trades":symbol="coinSymbol" />
+      <Trades v-if="isReady" :coin-symbol="symbol"/>
     </div>
     <img class="detail__divider" src="../assets/images/backgorunds/divider.svg" alt="">
   </div>
@@ -42,6 +42,7 @@ export default {
     await this.$store.dispatch('coinDetail/connectKlineSocket', this.symbol);
     await this.$store.dispatch('coinDetail/fetchOldVolumes', this.symbol);
     await this.$store.dispatch('coinDetail/connectOrderBookSocket', this.symbol);
+    await this.$store.dispatch('coinDetail/connectAggTradeSocket', this.symbol);
     this.isReady = true;
   },
   beforeUnmount() {

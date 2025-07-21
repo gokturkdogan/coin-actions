@@ -11,8 +11,8 @@ const coinDetail = {
     highPrice: null,
     lowPrice: null,
     quoteVolume: null,
-    quoteVolume1h: null, // Aktif mumun hacmi (1h kline)
-    oldVolumes: [], // Son 11 saatin hacmi ve kapanış zamanı
+    quoteVolume1h: null,
+    oldVolumes: [],
   }),
 
   mutations: {
@@ -34,7 +34,7 @@ const coinDetail = {
       state.quoteVolume = Number(data.q);
     },
     SET_QUOTE_VOLUME_1H(state, klineData) {
-      const quoteVolume = Number(klineData.k.q); // Aktif mumun quoteVolume'u
+      const quoteVolume = Number(klineData.k.q);
       state.quoteVolume1h = quoteVolume;
     },
     SET_OLD_VOLUMES(state, volumes) {
@@ -118,13 +118,11 @@ const coinDetail = {
           `https://api.binance.com/api/v3/klines?symbol=${upperSymbol}&interval=1h&limit=${limit}`
         );
         const data = await response.json();
-
-        // Son elemanı atla (aktif mum)
         const volumes = data
-          .slice(0, data.length - 1)  // son eleman hariç
+          .slice(0, data.length - 1)
           .map(item => ({
-            closeTime: item[6],          // Kapanış zamanı (ms cinsinden)
-            quoteVolume: Number(item[7]) // Hacim (USDT cinsinden)
+            closeTime: item[6],
+            quoteVolume: Number(item[7])
           }));
 
         commit('SET_OLD_VOLUMES', volumes);

@@ -5,6 +5,7 @@ const coinDetail = {
     symbol: null,
     tickerSocket: null,
     klineSocket: null,
+    orderBookSocket: null,
     price: null,
     priceChange: null,
     priceChangePercent: null,
@@ -13,6 +14,8 @@ const coinDetail = {
     quoteVolume: null,
     quoteVolume1h: null,
     oldVolumes: [],
+    bids: [],
+    asks: []
   }),
 
   mutations: {
@@ -24,6 +27,9 @@ const coinDetail = {
     },
     SET_KLINE_SOCKET(state, socket) {
       state.klineSocket = socket;
+    },
+    SET_ORDERBOOK_SOCKET(state, socket) {
+      state.orderBookSocket = socket;
     },
     SET_TICKER_DATA(state, data) {
       state.price = Number(data.c);
@@ -40,6 +46,10 @@ const coinDetail = {
     SET_OLD_VOLUMES(state, volumes) {
       state.oldVolumes = volumes;
     },
+    SET_ORDERBOOK_DATA(state, data) {
+      state.bids = data.bids.slice(0, 20).map(item => [Number(item[0]), Number(item[1])]);
+      state.asks = data.asks.slice(0, 20).map(item => [Number(item[0]), Number(item[1])]);
+    },
     CLOSE_TICKER_SOCKET(state) {
       if (state.tickerSocket) {
         console.log(`[coinDetail][${state.symbol}] Ticker socket closing...`);
@@ -53,62 +63,74 @@ const coinDetail = {
         state.klineSocket.close();
         state.klineSocket = null;
       }
+    },
+    CLOSE_ORDERBOOK_SOCKET(state) {
+      if (state.orderBookSocket) {
+        console.log(`[coinDetail][${state.symbol}] OrderBook socket closing...`);
+        state.orderBookSocket.close();
+        state.orderBookSocket = null;
+      }
     }
   },
-
   actions: {
     connectTickerSocket({ commit, state }, symbol) {
       commit('CLOSE_TICKER_SOCKET');
       commit('SET_SYMBOL', symbol);
-
       const wsSymbol = symbol.toLowerCase();
       const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${wsSymbol}@ticker`);
-
       socket.onopen = () => {
         console.log(`[coinDetail][${symbol}] Ticker socket opened.`);
       };
-
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         commit('SET_TICKER_DATA', data);
       };
-
       socket.onerror = (error) => {
         console.error(`[coinDetail][${symbol}] Ticker socket error:`, error);
       };
-
       socket.onclose = () => {
         console.log(`[coinDetail][${symbol}] Ticker socket closed.`);
       };
-
       commit('SET_TICKER_SOCKET', socket);
     },
-
     connectKlineSocket({ commit, state }, symbol) {
       commit('CLOSE_KLINE_SOCKET');
       const wsSymbol = symbol.toLowerCase();
       const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${wsSymbol}@kline_1h`);
-
       socket.onopen = () => {
         console.log(`[coinDetail][${symbol}] Kline socket opened.`);
       };
-
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         commit('SET_QUOTE_VOLUME_1H', data);
       };
-
       socket.onerror = (error) => {
         console.error(`[coinDetail][${symbol}] Kline socket error:`, error);
       };
-
       socket.onclose = () => {
         console.log(`[coinDetail][${symbol}] Kline socket closed.`);
       };
-
       commit('SET_KLINE_SOCKET', socket);
     },
-
+    connectOrderBookSocket({ commit, state }, symbol) {
+      commit('CLOSE_ORDERBOOK_SOCKET');
+      const wsSymbol = symbol.toLowerCase();
+      const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${wsSymbol}@depth20@100ms`);
+      socket.onopen = () => {
+        console.log(`[coinDetail][${symbol}] OrderBook socket opened.`);
+      };
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        commit('SET_ORDERBOOK_DATA', data);
+      };
+      socket.onerror = (error) => {
+        console.error(`[coinDetail][${symbol}] OrderBook socket error:`, error);
+      };
+      socket.onclose = () => {
+        console.log(`[coinDetail][${symbol}] OrderBook socket closed.`);
+      };
+      commit('SET_ORDERBOOK_SOCKET', socket);
+    },
     async fetchOldVolumes({ commit }, symbol) {
       if (!symbol) return;
       const upperSymbol = symbol.toUpperCase();
@@ -131,13 +153,12 @@ const coinDetail = {
         commit('SET_OLD_VOLUMES', []);
       }
     },
-
     disconnectSockets({ commit }) {
       commit('CLOSE_TICKER_SOCKET');
       commit('CLOSE_KLINE_SOCKET');
+      commit('CLOSE_ORDERBOOK_SOCKET');
     }
   },
-
   getters: {
     getPrice: state => state.price,
     getPriceChange: state => state.priceChange,
@@ -146,7 +167,9 @@ const coinDetail = {
     getLowPrice: state => state.lowPrice,
     getQuoteVolume: state => state.quoteVolume,
     getQuoteVolume1h: state => state.quoteVolume1h,
-    getOldVolumes: state => state.oldVolumes
+    getOldVolumes: state => state.oldVolumes,
+    getBids: state => state.bids,
+    getAsks: state => state.asks,
   }
 };
 

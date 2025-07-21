@@ -41,7 +41,6 @@
 import helpers from '../../mixins/helpers';
 import ArrowUpIcon from '../../assets/images/icons/arrow-up-icon.vue';
 import ArrowDownIcon from '../../assets/images/icons/arrow-down-icon.vue';
-import CircleEmptyIcon from '../../assets/images/icons/circle-empty-icon.vue';
 
 
 export default {
@@ -60,8 +59,7 @@ export default {
     mixins: [helpers],
     components: {
         ArrowUpIcon,
-        ArrowDownIcon,
-        CircleEmptyIcon
+        ArrowDownIcon
     },
     created() { },
     watch: {

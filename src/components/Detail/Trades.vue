@@ -25,8 +25,10 @@
                             <span class="trades__key">{{ trade.quantity }}</span>
                         </td>
                         <td class="trades__value">
-                            <ClockIcon class="trades__icon" :class="trade.type" />
-                            <span class="trades__key">{{ formatMillisecondsToTime(trade.timestamp) }}</span>
+                            <div class="trades__flex">
+                                <ClockIcon class="trades__icon" :class="trade.type" />
+                                <span class="trades__key">{{ formatMillisecondsToTime(trade.timestamp) }}</span>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -79,8 +81,6 @@ export default {
         border-bottom: 2px solid #31324f;
     }
 
-    &__table {}
-
     &__thead {
         background-color: #1d1f40;
     }
@@ -130,6 +130,12 @@ export default {
         &.sell {
             fill: rgb(207, 48, 74);
         }
+    }
+
+    &__flex {
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 }
 </style>

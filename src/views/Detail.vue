@@ -89,7 +89,7 @@ export default {
     }
 
     &__content {
-      margin-top: 10px;
+      margin-top: 20px;
       display: flex;
       justify-content: space-between;
       padding: 0 100px;

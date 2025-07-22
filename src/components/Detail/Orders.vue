@@ -4,29 +4,49 @@
             <div class="orders__title">
                 <div class="orders__text --title">Emir Takibi</div>
             </div>
-            <div class="orders__title">
-                <div class="orders__text">Fiyat</div>
-                <div class="orders__text">Miktar ({{ symbolFormatter(coinSymbol) }})</div>
-                <div class="orders__text">Tutar</div>
-            </div>
-            <div class="orders__item --buy" v-for="(buy, index) in buyOrders" :key="index">
-                <div class="orders__text --price --buy">$ {{ formatDecimal(buy[0]) }}</div>
-                <div class="orders__text">{{ buy[1] }}</div>
-                <div class="orders__text --amount">$ {{ formatDecimal(buy[0] * buy[1]) }}</div>
-            </div>
+            <table class="orders__table">
+                <thead class="orders__thead">
+                    <tr class="orders__heading">
+                        <th class="orders__head">Fiyat</th>
+                        <th class="orders__head">Miktar ({{ symbolFormatter(coinSymbol) }})</th>
+                        <th class="orders__head">Tutar ($)</th>
+                    </tr>
+                </thead>
+                <tbody class="orders__tbody">
+                    <tr class="orders__item buy" v-for="(buy, index) in buyOrders" :key="index">
+                        <td class="orders__value">
+                            <span class="orders__key buy">${{ formatDecimal(buy[0]) }}</span>
+                        </td>
+                        <td class="orders__value">
+                            <span class="orders__key">${{ buy[1] }}</span>
+                        </td>
+                        <td class="orders__value">
+                            <span class="orders__key">{{ formatDecimal(buy[0] * buy[1]) }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="orders__price" :class="{ '-up': priceDirection === 'up', '-down': priceDirection === 'down' }">
+        <div class="orders__price" :class="priceDirection">
             {{ price }} $
             <ArrowUpIcon class="orders__icon" v-if="priceDirection === 'up'" />
             <ArrowDownIcon class="orders__icon" v-else />
         </div>
-        <div class="orders__section">
-            <div class="orders__item --sell" v-for="(sell, index) in sellOrders" :key="index">
-                <div class="orders__text --price --sell">{{ formatDecimal(sell[0]) }}</div>
-                <div class="orders__text">{{ sell[1] }}</div>
-                <div class="orders__text">$ {{ formatDecimal(sell[0] * sell[1]) }}</div>
-            </div>
-        </div>
+        <table class="orders__table">
+            <tbody class="orders__tbody">
+                <tr class="orders__item sell" v-for="(sell, index) in sellOrders" :key="index">
+                    <td class="orders__value">
+                        <span class="orders__key sell">${{ formatDecimal(sell[0]) }}</span>
+                    </td>
+                    <td class="orders__value">
+                        <span class="orders__key">${{ sell[1] }}</span>
+                    </td>
+                    <td class="orders__value">
+                        <span class="orders__key">{{ formatDecimal(sell[0] * sell[1]) }}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
@@ -85,11 +105,6 @@ export default {
     border-radius: 10px;
     height: fit-content;
 
-    &__sell {
-        display: flex;
-        flex-direction: column;
-    }
-
     &__title {
         display: flex;
         justify-content: space-between;
@@ -97,73 +112,66 @@ export default {
         padding: 10px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-
-        &.--price {
-            justify-content: center;
-            font-size: 20px;
-        }
+        font-size: 16px;
+        border-bottom: 2px solid #31324f;
     }
 
     &__price {
         display: flex;
+        gap: 10px;
         justify-content: center;
         background-color: #1d1f40;
-        padding: 10px;
+        padding: 20px 0;
+        font-size: 26px;
         align-items: center;
-        font-size: 20px;
 
-        &.-up {
-            color: #00ff00;
+        &.up {
+            color: #6ccf59;
         }
-
-        &.-down {
+        &.down {
             color: #ff0000;
         }
     }
 
-    &__icon {
-        margin-left: 5px;
+    &__thead {
+        background-color: #1d1f40;
+    }
+
+    &__head {
+        padding: 10px;
+    }
+
+    &__tbody {
+        background-color: #31324f;
     }
 
     &__item {
-        display: flex;
-        padding: 5px 10px;
-        gap: 20px;
-        justify-content: space-between;
         cursor: pointer;
 
-        &.--buy {
+        &.buy {
             &:hover {
                 background-color: rgba(1, 167, 128, 0.271);
             }
         }
 
-        &.--sell {
+        &.sell {
             &:hover {
                 background-color: rgba(207, 48, 75, 0.271);
             }
         }
-
-        &.--amount {
-            text-align: right;
-        }
     }
 
-    &__text {
-        min-width: 80px;
+    &__value {
+        padding: 10px;
+    }
 
-        &.--title {
-            font-size: 16px;
+    &__key {
+        &.buy {
+            color: rgb(1, 167, 129);
         }
 
-        &.--price {
-            &.--buy {
-                color: rgb(1, 167, 129);
-            }
-
-            &.--sell {
-                color: rgb(207, 48, 74);
-            }
+        &.sell {
+            color: rgb(207, 48, 74);
         }
     }
 }

@@ -17,7 +17,9 @@ const coinDetail = {
     oldVolumes: [],
     bids: [],
     asks: [],
-    trades: []  // Son gerçekleşen agregate trade'ler burada tutulacak
+    trades: [],
+    detailTrades: [],
+    detailTradesDaily: []  // Son gerçekleşen agregate trade'ler burada tutulacak
   }),
 
   mutations: {
@@ -43,6 +45,12 @@ const coinDetail = {
       state.highPrice = Number(data.h);
       state.lowPrice = Number(data.l);
       state.quoteVolume = Number(data.q);
+    },
+    SET_DETAIL_TRADES(state, trades) {
+      state.detailTrades = trades;
+    },
+    SET_DETAIL_TRADES_DAILY(state, trades) {
+      state.detailTradesDaily = trades;
     },
     SET_QUOTE_VOLUME_1H(state, klineData) {
       const quoteVolume = Number(klineData.k.q);
@@ -199,6 +207,48 @@ const coinDetail = {
         commit('SET_OLD_VOLUMES', []);
       }
     },
+    async fetchDetailAggTrades({ commit }, { symbol, startTime, endTime }) {
+      const upperSymbol = symbol.toUpperCase();
+      try {
+        const response = await fetch(
+          `https://api.binance.com/api/v3/aggTrades?symbol=${upperSymbol}&startTime=${startTime}&endTime=${endTime}&limit=1000`
+        );
+        const data = await response.json();
+        const transformed = data.map(item => ({
+          price: Number(item.p),
+          quantity: Number(item.q),
+          timestamp: item.T,
+          type: item.m ? 'sell' : 'buy',
+          amount: Number(item.p) * Number(item.q)
+        }));
+        const sorted = transformed.sort((a, b) => b.amount - a.amount);
+        commit('SET_DETAIL_TRADES', sorted);
+      } catch (error) {
+        console.error(`[coinDetail][${upperSymbol}] fetchDetailAggTrades error:`, error);
+        commit('SET_DETAIL_TRADES', []);
+      }
+    },
+    async fetchDetailAggTradesDaily({ commit }, { symbol, startTime, endTime }) {
+      const upperSymbol = symbol.toUpperCase();
+      try {
+        const response = await fetch(
+          `https://api.binance.com/api/v3/aggTrades?symbol=${upperSymbol}&startTime=${startTime}&endTime=${endTime}&limit=1000`
+        );
+        const data = await response.json();
+        const transformed = data.map(item => ({
+          price: Number(item.p),
+          quantity: Number(item.q),
+          timestamp: item.T,
+          type: item.m ? 'sell' : 'buy',
+          amount: Number(item.p) * Number(item.q)
+        }));
+        const sorted = transformed.sort((a, b) => b.amount - a.amount);
+        commit('SET_DETAIL_TRADES_DAILY', sorted);
+      } catch (error) {
+        console.error(`[coinDetail][${upperSymbol}] fetchDetailAggTrades error:`, error);
+        commit('SET_DETAIL_TRADES_DAILY', []);
+      }
+    },
     disconnectSockets({ commit }) {
       commit('CLOSE_TICKER_SOCKET');
       commit('CLOSE_KLINE_SOCKET');
@@ -219,6 +269,8 @@ const coinDetail = {
     getBids: state => state.bids,
     getAsks: state => state.asks,
     getTrades: state => state.trades,
+    getDetailTrades: state => state.detailTrades,
+    getDetailTradesDaily: state => state.detailTradesDaily
   }
 };
 

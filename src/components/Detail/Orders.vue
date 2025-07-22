@@ -2,7 +2,7 @@
     <div class="orders">
         <div class="orders__section">
             <div class="orders__title">
-                <div class="orders__text --title">Emir Takibi</div>
+                <div class="orders__text --title">Anlık Emir Takibi</div>
             </div>
             <table class="orders__table">
                 <thead class="orders__thead">
@@ -104,6 +104,7 @@ export default {
     font-size: 12px;
     border-radius: 10px;
     height: fit-content;
+    min-width: 310px;
 
     &__title {
         display: flex;

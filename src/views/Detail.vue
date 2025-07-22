@@ -7,6 +7,8 @@
     </div>
     <div class="detail__content">
       <Orders v-if="isReady" :coin-symbol="symbol"/>
+      <DetailedTradesHourly v-if="isReady" :coin-symbol="symbol"/>
+      <DetailedTradesDaily v-if="isReady" :coin-symbol="symbol"/>
       <Trades v-if="isReady" :coin-symbol="symbol"/>
     </div>
     <img class="detail__divider" src="../assets/images/backgorunds/divider.svg" alt="">
@@ -18,6 +20,8 @@ import Volumes from '../components/Detail/Volumes.vue';
 import Header from '../components/Detail/Header.vue';
 import Orders from '../components/Detail/Orders.vue';
 import Trades from '../components/Detail/Trades.vue';
+import DetailedTradesHourly from '../components/Detail/DetailedTradesHourly.vue';
+import DetailedTradesDaily from '../components/Detail/DetailedTradesDaily.vue';
 export default {
   name: "list",
   data() {
@@ -29,7 +33,9 @@ export default {
     Header,
     Volumes,
     Orders,
-    Trades
+    Trades,
+    DetailedTradesHourly,
+    DetailedTradesDaily
   },
   props: {
     symbol: {
@@ -43,6 +49,19 @@ export default {
     await this.$store.dispatch('coinDetail/fetchOldVolumes', this.symbol);
     await this.$store.dispatch('coinDetail/connectOrderBookSocket', this.symbol);
     await this.$store.dispatch('coinDetail/connectAggTradeSocket', this.symbol);
+    const now = Date.now();
+    const oneHourAgo = now - 60 * 60 * 1000;
+    const oneDayAgo = now - 60 * 60 * 1000 * 24;
+    await this.$store.dispatch('coinDetail/fetchDetailAggTrades', {
+      symbol: this.symbol,
+      startTime: oneHourAgo,
+      endTime: now
+    });
+    await this.$store.dispatch('coinDetail/fetchDetailAggTradesDaily', {
+      symbol: this.symbol,
+      startTime: oneDayAgo,
+      endTime: now
+    });
     this.isReady = true;
   },
   beforeUnmount() {
@@ -84,7 +103,7 @@ export default {
     &__header {
       display: flex;
       flex-direction: column;
-      padding: 0 100px;
+      padding: 0 50px;
       gap: 20px;
     }
 
@@ -92,7 +111,7 @@ export default {
       margin-top: 20px;
       display: flex;
       justify-content: space-between;
-      padding: 0 100px;
+      padding: 0 50px;
     }
   }
 </style>

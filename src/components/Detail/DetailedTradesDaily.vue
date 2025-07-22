@@ -1,8 +1,15 @@
 <template>
     <div class="trades">
         <div class="trades__section">
-            <div class="trades__title">
-                Anlık Trade Listesi
+            <div class="trades__header">
+                <span class="trades__title">Günlük Trade Takibi</span>
+                <div class="trades__ranges">
+                    <span @click="changeRange(1)" class="trades__range" :class="{ '-active': activeDay === 1 }">1</span>
+                    <span @click="changeRange(2)" class="trades__range" :class="{ '-active': activeDay === 2 }">2</span>
+                    <span @click="changeRange(5)" class="trades__range" :class="{ '-active': activeDay === 5 }">5</span>
+                    <span @click="changeRange(7)" class="trades__range" :class="{ '-active': activeDay === 7 }">7</span>
+                    <span @click="changeRange(15)" class="trades__range" :class="{ '-active': activeDay === 15 }">15</span>
+                </div>
             </div>
             <table class="trades__table">
                 <thead class="trades__thead">
@@ -14,20 +21,21 @@
                     </tr>
                 </thead>
                 <tbody class="trades__tbody">
-                    <tr class="trades__item" :class="trade.type" v-for="(trade, index) in trades" :key="index">
+                    <tr class="trades__item" :class="trade.type" v-for="(trade, index) in detailedTradesDaily" :key="index">
                         <td class="trades__value">
                             <span class="trades__key" :class="trade.type">${{ formatDecimal(trade.price) }}</span>
                         </td>
                         <td class="trades__value">
-                            <span class="trades__key">${{ formatDecimal(trade.quantity * trade.price) }}</span>
+                            <span class="trades__key">${{ formatDecimal(trade.amount) }}</span>
                         </td>
                         <td class="trades__value">
                             <span class="trades__key">{{ trade.quantity }}</span>
                         </td>
                         <td class="trades__value">
                             <div class="trades__flex">
+                                <CalendarIcon class="trades__icon" :class="trade.type" />
+                                <span class="trades__key">{{ formatTimestamp(trade.timestamp) }}</span>
                                 <ClockIcon class="trades__icon" :class="trade.type" />
-                                <span class="trades__key">{{ formatMillisecondsToTime(trade.timestamp) }}</span>
                             </div>
                         </td>
                     </tr>
@@ -39,11 +47,14 @@
 
 <script>
 import helpers from '../../mixins/helpers';
-import ClockIcon from '../../assets/images/icons/clock-icon.vue'
+import ClockIcon from '../../assets/images/icons/clock-icon.vue';
+import CalendarIcon from '../../assets/images/icons/calendar-icon.vue'
 export default {
-    name: "detail-trade",
+    name: "detail-trades",
     data() {
-        return {}
+        return {
+            activeDay: 1
+        }
     },
     props: {
         coinSymbol: {
@@ -51,13 +62,27 @@ export default {
             required: true
         }
     },
-    mixins: [helpers],
     components: {
-        ClockIcon
+        ClockIcon,
+        CalendarIcon
     },
+    mixins: [helpers],
     computed: {
-        trades() {
-            return this.$store.getters['coinDetail/getTrades'];
+        detailedTradesDaily() {
+            return this.$store.getters['coinDetail/getDetailTradesDaily']
+        }
+    },
+    methods: {
+        changeRange(selectedDay) {
+            const now = Date.now();
+            const newRange = selectedDay * 24;
+            const range = now - 60 * 60 * 1000 * newRange;
+            this.activeDay = selectedDay;
+            this.$store.dispatch('coinDetail/fetchDetailAggTradesDaily', {
+                symbol: this.coinSymbol,
+                startTime: range,
+                endTime: now
+            });
         }
     }
 };
@@ -69,18 +94,46 @@ export default {
     font-size: 12px;
     height: fit-content;
     border-radius: 10px;
-    max-height: 1610px;
+    max-height: 1500px;
     overflow-y: scroll;
 
-    &__title {
+    &__header {
+        gap: 20px;
         display: flex;
+        align-items: center;
         justify-content: space-between;
         background-color: #1d1f40;
         padding: 10px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-        font-size: 16px;
         border-bottom: 2px solid #31324f;
+    }
+
+    &__ranges {
+        display: flex;
+        gap: 5px;
+    }
+
+    &__range {
+        border-radius: 5px;
+        border: 1px solid #FF3BD4;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: 0.3s;
+
+        &:hover {
+            background-color: #FF3BD4;
+            box-shadow: 0 0 26px -5px #FF3BD4;
+        }
+
+        &.-active {
+            background-color: #FF3BD4;
+            box-shadow: 0 0 26px -5px #FF3BD4;
+        }
+    }
+
+    &__title {
+        font-size: 16px;
     }
 
     &__thead {

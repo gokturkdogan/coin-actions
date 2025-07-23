@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const COINS = [
-  'BTCUSDT', 'XRPUSDT', 'BCHUSDT', 'ETHUSDT', 'MATICUSDT',
-  'SOLUSDT', 'BNBUSDT', 'BONKUSDT', 'BSWUSDT', 'GUNUSDT',
+  'BTCUSDT', 'XRPUSDT', 'BCHUSDT', 'ETHUSDT',
+  'SOLUSDT', 'BNBUSDT', 'BONKUSDT', 'GUNUSDT',
   'FLOKIUSDT', 'ACXUSDT', 'WIFUSDT', 'BOMEUSDT',
   'UNIUSDT', 'TURBOUSDT', 'ZENUSDT', 'ACHUSDT',
   'NEIROUSDT', 'TONUSDT', 'DOGEUSDT', 'RAYUSDT',
@@ -77,11 +77,6 @@ const actions = {
       const previousKlineRaw = klines[0];
       const previousKline = {
         openTime: previousKlineRaw[0],
-        open: Number(previousKlineRaw[1]),
-        high: Number(previousKlineRaw[2]),
-        low: Number(previousKlineRaw[3]),
-        close: Number( previousKlineRaw[4]),
-        volume: Number(previousKlineRaw[5]),
         closeTime: previousKlineRaw[6],
         quoteAssetVolume: Number(previousKlineRaw[7])
       };
@@ -123,11 +118,6 @@ const actions = {
 
         const liveKline = {
           openTime: kline.t,
-          open: Number(kline.o),
-          high: Number(kline.h),
-          low: Number(kline.l),
-          close: Number(kline.c),
-          volume: Number(kline.v),
           closeTime: kline.T,
           quoteAssetVolume: Number(kline.q),
           isFinal: kline.x,

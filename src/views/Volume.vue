@@ -48,7 +48,7 @@ export default {
       margin-top: 10px;
       display: flex;
       justify-content: center;
-      padding: 0 50px;
+      padding: 0 100px;
       color: white;
     }
   }

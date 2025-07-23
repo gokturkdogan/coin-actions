@@ -18,14 +18,8 @@
                     <th class="list__name">Coin</th>
                     <th class="list__name">Açılış<span class="list__tooltip">Geçmiş Mum Açılış Saati</span></th>
                     <th class="list__name">Kapanış<span class="list__tooltip">Geçmiş Mum Kapanış Saati</span></th>
-                    <th class="list__name">Açılış<span class="list__tooltip">Geçmiş Mum Açılış Fiyatı</span></th>
-                    <th class="list__name">Kapanış<span class="list__tooltip">Geçmiş Mum Kapanış Fiyatı</span></th>
-                    <th class="list__name">Yüksek<span class="list__tooltip">Geçmiş Mum En Yüksek Fiyat</span></th>
-                    <th class="list__name">Düşük<span class="list__tooltip">Geçmiş Mum En Düşük Fiyat</span></th>
                     <th class="list__name">Hacim<span class="list__tooltip">Geçmiş Mum Hacim</span></th>
-                    <th class="list__name">Açılış<span class="list__tooltip">Güncel Mum Açılış saati</span></th>
-                    <th class="list__change">Yüksek<span class="list__tooltip">Güncel Mum En Füksek Fiyat</span></th>
-                    <th class="list__change">Düşük<span class="list__tooltip">Güncel Mum En Düşük fiyat</span></th>
+                    <th class="list__change">Açılış<span class="list__tooltip">Güncel Mum Açılış saati</span></th>
                     <th class="list__change" @click="changeOrder('volume')"
                         :class="{ '-active': activeOrder === 'volume' }">Hacim<span class="list__tooltip">Güncel Mum
                             Anlık Hacim</span></th>
@@ -58,30 +52,6 @@
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__name">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <DollarIcon />{{ formatDecimal(coin.previousKline.open) }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__name">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <DollarIcon />{{ formatDecimal(coin.previousKline.close) }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__name">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <DollarIcon />{{ formatDecimal(coin.previousKline.high) }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__price">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <DollarIcon />{{ formatDecimal(coin.previousKline.low) }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
                     <td class="list__price">
                         <span v-if="coin.previousKline" class="list__symbol">
                             <DollarIcon />{{ formatDecimal(coin.previousKline.quoteAssetVolume) }}
@@ -95,19 +65,7 @@
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price">
-                        <span v-if="coin.liveKline" class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.liveKline?.high) || '-' }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__price">
-                        <span v-if="coin.liveKline" class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.liveKline?.low) || '-' }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__price" :class="{ '-active': activeOrder === 'volume' }">
+                    <td class="list__price -width" :class="{ '-active': activeOrder === 'volume' }">
                         <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
                         </span>
@@ -360,16 +318,6 @@ export default {
         }
     }
 
-    &__tabIcon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    &__tabText {
-        //color: #ffffff;
-    }
-
     &__table {
         margin-top: 20px;
         width: 100%;
@@ -381,7 +329,7 @@ export default {
         font-size: 14px;
 
         thead {
-            font-size: 13px;
+            font-size: 16px;
 
             th {
                 cursor: pointer;
@@ -399,7 +347,7 @@ export default {
 
         th,
         td {
-            padding: 25px 5px;
+            padding: 25px;
             border: none;
             outline: none;
 
@@ -432,7 +380,6 @@ export default {
     }
 
     &__number {
-        width: 44px;
         text-align: left;
     }
 
@@ -508,8 +455,11 @@ export default {
     }
 
     &__price {
-        width: 200px;
         text-align: right;
+
+        &.-width {
+            min: 120px;
+        }
 
         &.-colored {
             &.-up {
@@ -523,7 +473,6 @@ export default {
     }
 
     &__change {
-        width: 100px;
         text-align: right;
         position: relative;
     }

@@ -1,23 +1,23 @@
 <template>
-  <div class="main">
+  <div class="volume">
     <TheHeader :current-route="currentRoute"/>
-    <Home />
+    <Volume />
     <TheFooter />
   </div>
 </template>
 
 <script>
 import TheHeader from '../components/Base/TheHeader.vue'
-import Home from '../views/Home.vue'
+import Volume from '../views/Volume.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
 export default {
-  name: "main-layout",
+  name: "spot-layout",
   data() {
     return {}
   },
   components: {
     TheHeader,
-    Home,
+    Volume,
     TheFooter
   },
   created() { },
@@ -30,7 +30,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.main {
+.volume {
   background-color: #080713;
   min-height: 100vh;
 }

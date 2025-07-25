@@ -1,24 +1,29 @@
 <template>
-  <div class="main">
+  <div class="detail">
     <TheHeader :current-route="currentRoute"/>
-    <Home />
+    <Detail v-if="symbol" :symbol="symbol"/>
     <TheFooter />
   </div>
 </template>
 
 <script>
 import TheHeader from '../components/Base/TheHeader.vue'
-import Home from '../views/Home.vue'
+import Detail from '../views/Detail.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
 export default {
-  name: "main-layout",
+  name: "detail-layout",
   data() {
     return {}
   },
   components: {
     TheHeader,
-    Home,
+    Detail,
     TheFooter
+  },
+  props: {
+    symbol: {
+      type: String
+    }
   },
   created() { },
   methods: {},
@@ -30,7 +35,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.main {
+.detail {
   background-color: #080713;
   min-height: 100vh;
 }

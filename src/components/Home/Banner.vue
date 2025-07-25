@@ -2,8 +2,7 @@
     <div class="banner">
         <div class="banner__text">COIN ACTIONS İle Takipte Kalın</div>
         <div class="banner__buttons">
-            <router-link to="/login" class="banner__button">Hemen Premium Al</router-link>
-            <span @click="showCoins()" class="banner__button">Tüm Coinler</span>
+            <router-link class="banner__button" to="/coin-actions/coin-list">Tüm Coinler</router-link>
         </div>
     </div>
 </template>
@@ -17,11 +16,7 @@ export default {
     },
     components: {},
     created() {},
-    methods: {
-        showCoins() {
-            this.$emit('open-modal')
-        }
-    },
+    methods: {},
 };
 </script>
 <style lang="scss" scoped>
@@ -29,7 +24,6 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 150px;
 
     &__text {
         color: #CCCEEF;

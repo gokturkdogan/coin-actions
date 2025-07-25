@@ -67,35 +67,43 @@ const mutations = {
 const actions = {
   async fetchPreviousKline({ commit, state }, symbol) {
     if (state.fetchedCoins.includes(symbol)) return;
-
+    const cachedData = localStorage.getItem(`previousKline_${symbol}`);
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        commit('setCoinData', { symbol, data: { previousKline: parsed } });
+        commit('setLastKlineCloseTime', parsed.closeTime);
+        commit('markCoinAsFetched', symbol);
+        return;
+      } catch (e) {
+        console.warn(`LocalStorage parse hatası (${symbol}):`, e);
+      }
+    }
     try {
       const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=2`;
       const res = await axios.get(url);
       const klines = res.data;
       if (klines.length < 2) return;
-
       const previousKlineRaw = klines[0];
       const previousKline = {
         openTime: previousKlineRaw[0],
         closeTime: previousKlineRaw[6],
         quoteAssetVolume: Number(previousKlineRaw[7])
       };
-
       commit('setCoinData', { symbol, data: { previousKline } });
       commit('setLastKlineCloseTime', previousKline.closeTime);
       commit('markCoinAsFetched', symbol);
+      localStorage.setItem(`previousKline_${symbol}`, JSON.stringify(previousKline));
     } catch (e) {
       console.error(`fetchPreviousKline hata (${symbol}):`, e);
     }
   },
-
   async fetchAllPreviousKlinesWithDelay({ dispatch }) {
     for (const symbol of COINS) {
       await dispatch('fetchPreviousKline', symbol);
       await new Promise(res => setTimeout(res, 300));
     }
   },
-
   connectKlineSocket({ commit, dispatch, state }) {
     if (state.socket) {
       console.log('Saatlik hacim websocket zaten açık, kapatılıyor...');
@@ -127,6 +135,7 @@ const actions = {
 
         if (liveKline.isFinal && liveKline.closeTime !== state.lastKlineCloseTime) {
           commit('setLastKlineCloseTime', liveKline.closeTime);
+          localStorage.removeItem(`previousKline_${symbol}`);
           dispatch('fetchPreviousKline', symbol);
         }
       } catch (e) {

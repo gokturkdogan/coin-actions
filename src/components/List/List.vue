@@ -2,44 +2,30 @@
   <div class="list">
     <div class="list__header">
       <div class="list__input" :class="{ '-focused': inputFocused || searchText }">
-        <input
-          type="text"
-          v-model="searchText"
-          placeholder="Coin Ara"
-          @focus="inputFocused = true"
-          @blur="inputFocused = false"
-        />
+        <input type="text" v-model="searchText" placeholder="Coin Ara" @focus="inputFocused = true"
+          @blur="inputFocused = false" />
         <Search />
       </div>
-      <span class="list__info">Lütfen detayını görmek istediğiniz coin sembolüne tıklayınız</span>
+      <div class="list__tooltip">
+        <InfoIcon class="list__tooltipIcon"/>
+        <span class="list__tooltipContent">
+          Lütfen detayını görmek istediğiniz coine tıklayınız
+        </span>
+      </div>
       <h2 class="list__title">TÜM COINLER</h2>
       <div class="list__tabs">
-        <div
-          class="list__tab"
-          :class="{ '-active': sortField === 'lastPrice' }"
-          @click="setSort('lastPrice')"
-        >
+        <div class="list__tab" :class="{ '-active': sortField === 'lastPrice' }" @click="setSort('lastPrice')">
           <span class="list__tabText">Fiyat</span>
         </div>
-        <div
-          class="list__tab"
-          :class="{ '-active': sortField === 'quoteVolume' }"
-          @click="setSort('quoteVolume')"
-        >
+        <div class="list__tab" :class="{ '-active': sortField === 'quoteVolume' }" @click="setSort('quoteVolume')">
           <span class="list__tabText">Spot Hacim</span>
         </div>
-        <div
-          class="list__tab"
-          :class="{ '-active': sortField === 'quoteFutureVolume' }"
-          @click="setSort('quoteFutureVolume')"
-        >
+        <div class="list__tab" :class="{ '-active': sortField === 'quoteFutureVolume' }"
+          @click="setSort('quoteFutureVolume')">
           <span class="list__tabText">Vadeli Hacim</span>
         </div>
-        <div
-          class="list__tab"
-          :class="{ '-active': sortField === 'priceChangePercent' }"
-          @click="setSort('priceChangePercent')"
-        >
+        <div class="list__tab" :class="{ '-active': sortField === 'priceChangePercent' }"
+          @click="setSort('priceChangePercent')">
           <span class="list__tabText">Değişim</span>
         </div>
       </div>
@@ -54,69 +40,67 @@
           <th class="list__name">En Yüksek Fiyat</th>
           <th class="list__price">En Düşük Fiyat</th>
           <th class="list__change" :class="{ '-active': sortField === 'quoteVolume' }">İşlem Hacmi 24s (Spot)</th>
-          <th class="list__change" :class="{ '-active': sortField === 'quoteFutureVolume' }">İşlem Hacmi 24s (Vadeli)</th>
+          <th class="list__change" :class="{ '-active': sortField === 'quoteFutureVolume' }">İşlem Hacmi 24s (Vadeli)
+          </th>
           <th class="list__change" :class="{ '-active': sortField === 'priceChangePercent' }">Değişim %</th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          :class="{
+        <router-link v-for="(coin, index) in coins" :key="coin.symbol" :to="'/coin-actions/coin-detail/' + coin.symbol"
+          custom v-slot="{ navigate, href }">
+          <tr :href="href" @click="navigate" :class="{
             '-up': priceDirections[coin.symbol] === 'up',
             '-down': priceDirections[coin.symbol] === 'down',
-          }"
-          class="list__item"
-          v-for="(coin, index) in coins"
-          :key="coin.symbol"
-        >
-          <td class="list__number"> <router-link :to="'/coin-actions/coin-detail/' + coin.symbol" class="list__link">{{ symbolFormatter(coin.symbol) }}</router-link></td>
-          <td class="list__name" :class="{ '-active': sortField === 'lastPrice' }">
-            <span class="list__symbol">
-              <DollarIcon />{{ formatDecimal(coin.lastPrice) }}
-            </span>
-          </td>
-          <td class="list__name">
-            <span class="list__symbol">
-              <DollarIcon />{{ formatDecimal(coin.bestBidPrice) }}
-            </span>
-          </td>
-          <td class="list__name">
-            <span class="list__symbol">
-              <DollarIcon />{{ formatDecimal(coin.bestAskPrice) }}
-            </span>
-          </td>
-          <td class="list__price">
-            <span class="list__symbol">
-              <DollarIcon />{{ formatDecimal(coin.highPrice) }}
-            </span>
-          </td>
-          <td class="list__price">
-            <span class="list__currency">
-              <DollarIcon />{{ formatDecimal(coin.lowPrice) }}
-            </span>
-          </td>
-          <td class="list__price" :class="{ '-active': sortField === 'quoteVolume' }">
-            <span class="list__currency">
-              <DollarIcon />{{ formatDecimal(coin.quoteVolume) }}
-            </span>
-          </td>
-          <td class="list__price" :class="{ '-active': sortField === 'quoteFutureVolume' }">
-            <span class="list__currency">
-              <DollarIcon />{{ formatDecimal(coin.quoteFutureVolume) }}
-            </span>
-          </td>
-          <td class="list__change" :class="{ '-active': sortField === 'priceChangePercent' }">
-            <span class="list__span">
-              <span
-                class="list__colored"
-                :class="{ '-up': coin.priceChangePercent > 0, '-down': coin.priceChangePercent < 0 }"
-              >
-                <ArrowUp v-if="coin.priceChangePercent > 0" />
-                <ArrowDown v-else />
-                {{ percentFormatter(coin.priceChangePercent) }}
+          }" class="list__item">
+            <td class="list__number"> <router-link :to="'/coin-actions/coin-detail/' + coin.symbol"
+                class="list__link">{{ symbolFormatter(coin.symbol) }}</router-link></td>
+            <td class="list__name" :class="{ '-active': sortField === 'lastPrice' }">
+              <span class="list__symbol">
+                <DollarIcon />{{ formatDecimal(coin.lastPrice) }}
               </span>
-            </span>
-          </td>
-        </tr>
+            </td>
+            <td class="list__name">
+              <span class="list__symbol">
+                <DollarIcon />{{ formatDecimal(coin.bestBidPrice) }}
+              </span>
+            </td>
+            <td class="list__name">
+              <span class="list__symbol">
+                <DollarIcon />{{ formatDecimal(coin.bestAskPrice) }}
+              </span>
+            </td>
+            <td class="list__price">
+              <span class="list__symbol">
+                <DollarIcon />{{ formatDecimal(coin.highPrice) }}
+              </span>
+            </td>
+            <td class="list__price">
+              <span class="list__currency">
+                <DollarIcon />{{ formatDecimal(coin.lowPrice) }}
+              </span>
+            </td>
+            <td class="list__price" :class="{ '-active': sortField === 'quoteVolume' }">
+              <span class="list__currency">
+                <DollarIcon />{{ formatDecimal(coin.quoteVolume) }}
+              </span>
+            </td>
+            <td class="list__price" :class="{ '-active': sortField === 'quoteFutureVolume' }">
+              <span class="list__currency">
+                <DollarIcon />{{ formatDecimal(coin.quoteFutureVolume) }}
+              </span>
+            </td>
+            <td class="list__change" :class="{ '-active': sortField === 'priceChangePercent' }">
+              <span class="list__span">
+                <span class="list__colored"
+                  :class="{ '-up': coin.priceChangePercent > 0, '-down': coin.priceChangePercent < 0 }">
+                  <ArrowUp v-if="coin.priceChangePercent > 0" />
+                  <ArrowDown v-else />
+                  {{ percentFormatter(coin.priceChangePercent) }}
+                </span>
+              </span>
+            </td>
+          </tr>
+        </router-link>
       </tbody>
     </table>
   </div>
@@ -128,6 +112,7 @@ import ArrowUp from '../../assets/images/icons/arrow-up-icon.vue';
 import ArrowDown from '../../assets/images/icons/arrow-down-icon.vue';
 import UpDown from '../../assets/images/icons/up-down-icon.vue';
 import Search from '../../assets/images/icons/search-icon.vue';
+import InfoIcon from '../../assets/images/icons/info-icon.vue';
 import helpers from '../../mixins/helpers';
 
 export default {
@@ -149,6 +134,7 @@ export default {
     ArrowDown,
     UpDown,
     Search,
+    InfoIcon
   },
   mixins: [helpers],
   watch: {
@@ -231,277 +217,283 @@ export default {
 </script>
 <style lang="scss" scoped>
 .list {
-    background-color: #070710;
-    padding: 15px;
+  background-color: #070710;
+  padding: 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(47, 51, 109, 0.6);
+  position: relative;
+  box-shadow: 0 0 26px -5px #FF3BD4;
+
+  &__header {
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  &__input {
+    position: absolute;
+    transform: translateY(-50%);
+    top: 50%;
+    left: 0;
+    background-color: #0F1021;
+    outline: none;
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: 1px solid #5349CA;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    transition: 0.5;
+
+    &.-focused {
+      border-color: #FF3BD4;
+      box-shadow: 0 0 26px -5px #FF3BD4;
+    }
+
+    &:hover {
+      border-color: #FF3BD4;
+      box-shadow: 0 0 26px -5px #FF3BD4;
+    }
+
+    input {
+      background: none;
+      border: none;
+      outline: none;
+      color: #ffffff;
+
+      &:focus {
+        border: none;
+        outline: none;
+      }
+    }
+  }
+
+  &__title {
+    color: #CCCEEF;
+    font-size: 16px;
+    text-align: center;
+    position: relative;
+    padding: 0 20px;
+
+    &::before {
+      top: 5px;
+      content: "";
+      width: 8px;
+      height: 8px;
+      position: absolute;
+      border-radius: 100%;
+      background-color: #0F1021;
+      background-image: radial-gradient(#5349CA, transparent);
+      right: 0;
+    }
+
+    &::after {
+      top: 5px;
+      content: "";
+      width: 8px;
+      height: 8px;
+      position: absolute;
+      border-radius: 100%;
+      background-color: #0F1021;
+      background-image: radial-gradient(#5349CA, transparent);
+      left: 0;
+    }
+  }
+
+  &__tooltip {
+    position: absolute;
+    color: #b9b9b9;
+    transform: translateY(-50%);
+    top: 50%;
+    left: 230px;
+    display: flex;
+    align-items: center;
+  }
+
+  &__tooltipIcon {
+    margin-right: 5px;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 10px;
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    top: 50%;
+  }
+
+  &__tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    border: 1px solid #5349CA;
+    padding: 5px 20px;
+    border-radius: 10px;
+    transition: 0.3s;
+    color: #ffffff;
+
+    svg {
+      margin: 0;
+    }
+
+    &:hover {
+      border-color: #FF3BD4;
+      box-shadow: 0 0 26px -5px #FF3BD4;
+
+      svg {
+        fill: #FF3BD4;
+      }
+    }
+
+    &.-active {
+      border-color: #FF3BD4;
+      box-shadow: 0 0 26px -5px #FF3BD4;
+      color: #FF3BD4;
+
+      svg {
+        fill: #FF3BD4;
+      }
+    }
+  }
+
+  &__tabIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__table {
+    margin-top: 20px;
+    width: 100%;
+    color: #FFFFFF;
+    background-color: #0F1021;
     border-radius: 20px;
     border: 1px solid rgba(47, 51, 109, 0.6);
-    position: relative;
-    box-shadow: 0 0 26px -5px #FF3BD4;
+    margin-bottom: 50px;
+    font-size: 14px;
 
-    &__header {
-        display: flex;
-        justify-content: center;
-        position: relative;
+    th,
+    td {
+      padding: 20px 10px;
+      border: none;
+      outline: none;
+
+      &.-active {
+        box-shadow: 0 0 26px -5px #FF3BD4;
+      }
     }
 
-    &__input {
-        position: absolute;
-        transform: translateY(-50%);
-        top: 50%;
-        left: 0;
-        background-color: #0F1021;
-        outline: none;
-        border: none;
-        color: #ffffff;
-        padding: 10px 20px;
-        border: 1px solid #5349CA;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        transition: 0.5;
-
-        &.-focused {
-            border-color: #FF3BD4;
-            box-shadow: 0 0 26px -5px #FF3BD4;
-        }
-
-        &:hover {
-            border-color: #FF3BD4;
-            box-shadow: 0 0 26px -5px #FF3BD4;
-        }
-
-        input {
-            background: none;
-            border: none;
-            outline: none;
-            color: #ffffff;
-
-            &:focus {
-                border: none;
-                outline: none;
-            }
-        }
-    }
-
-    &__title {
-        color: #CCCEEF;
-        font-size: 16px;
-        text-align: center;
-        position: relative;
-        padding: 0 20px;
-
-        &::before {
-            top: 5px;
-            content: "";
-            width: 8px;
-            height: 8px;
-            position: absolute;
-            border-radius: 100%;
-            background-color: #0F1021;
-            background-image: radial-gradient(#5349CA, transparent);
-            right: 0;
-        }
-
-        &::after {
-            top: 5px;
-            content: "";
-            width: 8px;
-            height: 8px;
-            position: absolute;
-            border-radius: 100%;
-            background-color: #0F1021;
-            background-image: radial-gradient(#5349CA, transparent);
-            left: 0;
-        }
-    }
-
-    &__info {
-      position: absolute;
+    tbody {
       color: #b9b9b9;
-      transform: translateY(-50%);
-      top: 50%;
-      left: 220px;
-    }
 
-    &__tabs {
-        display: flex;
-        gap: 10px;
-        position: absolute;
-        right: 0;
-        transform: translateY(-50%);
-        top: 50%;
-    }
-
-    &__tab {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
+      tr {
         cursor: pointer;
-        border: 1px solid #5349CA;
-        padding: 5px 20px;
-        border-radius: 10px;
         transition: 0.3s;
-        color: #ffffff;
-
-        svg {
-            margin: 0;
-        }
+        border-radius: 20px;
 
         &:hover {
-            border-color: #FF3BD4;
-            box-shadow: 0 0 26px -5px #FF3BD4;
-
-            svg {
-                fill: #FF3BD4;
-            }
+          background-color: rgba(47, 51, 109, 0.6);
         }
-
-        &.-active {
-            border-color: #FF3BD4;
-            box-shadow: 0 0 26px -5px #FF3BD4;
-            color: #FF3BD4;
-
-            svg {
-                fill: #FF3BD4;
-            }
-        }
+      }
     }
 
-    &__tabIcon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+  }
+
+  &__item {
+    &.-up {
+      background-color: rgba(0, 200, 0, 0.220);
+      transition: background-color 0.5s ease;
     }
 
-    &__table {
-        margin-top: 20px;
-        width: 100%;
-        color: #FFFFFF;
-        background-color: #0F1021;
-        border-radius: 20px;
-        border: 1px solid rgba(47, 51, 109, 0.6);
-        margin-bottom: 50px;
-        font-size: 14px;
+    &.-down {
+      background-color: rgba(200, 0, 0, 0.220);
+      transition: background-color 0.5s ease;
+    }
+  }
 
-        th,
-        td {
-            padding: 20px 10px;
-            border: none;
-            outline: none;
+  &__number {
+    width: 44px;
+    text-align: left;
+  }
 
-            &.-active {
-                box-shadow: 0 0 26px -5px #FF3BD4;
-            }
-        }
+  &__name {
+    width: 270px;
+    text-align: left;
+  }
 
-        tbody {
-            color: #b9b9b9;
+  &__symbol {
+    display: flex;
+    align-items: center;
+  }
 
-            tr {
-                cursor: pointer;
-                transition: 0.3s;
-                border-radius: 20px;
+  &__cur {
+    font-size: 12px;
+    margin-left: 5px;
 
-                &:hover {
-                    background-color: rgba(47, 51, 109, 0.6);
-                }
-            }
-        }
-
+    &.-up {
+      color: #6ccf59;
     }
 
-    &__item {
-        &.-up {
-            background-color: rgba(0, 200, 0, 0.220);
-            transition: background-color 0.5s ease;
-        }
+    &.-down {
+      color: #ff4d4d;
+    }
+  }
 
-        &.-down {
-            background-color: rgba(200, 0, 0, 0.220);
-            transition: background-color 0.5s ease;
-        }
+  &__currency {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  &__img {
+    width: 20px;
+    margin-right: 10px;
+  }
+
+  &__price {
+    width: 200px;
+    text-align: right;
+  }
+
+  &__change {
+    width: 100px;
+    text-align: right;
+  }
+
+  &__span {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+  }
+
+  &__colored {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 7px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+
+    &.-up {
+      background: rgba(52, 179, 73, 0.3);
+      color: #6ccf59;
     }
 
-    &__number {
-        width: 44px;
-        text-align: left;
+    &.-down {
+      background-color: rgba(240, 41, 52, 0.3);
+      color: #ff4d4d;
     }
+  }
 
-    &__name {
-        width: 270px;
-        text-align: left;
-    }
-
-    &__symbol {
-        display: flex;
-        align-items: center;
-    }
-
-    &__cur {
-        font-size: 12px;
-        margin-left: 5px;
-
-        &.-up {
-            color: #6ccf59;
-        }
-
-        &.-down {
-            color: #ff4d4d;
-        }
-    }
-
-    &__currency {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-    }
-
-    &__img {
-        width: 20px;
-        margin-right: 10px;
-    }
-
-    &__price {
-        width: 200px;
-        text-align: right;
-    }
-
-    &__change {
-        width: 100px;
-        text-align: right;
-    }
-
-    &__span {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-
-    }
-
-    &__colored {
-        height: 30px;
-        display: flex;
-        align-items: center;
-        padding: 0 7px;
-        border-radius: 8px;
-        overflow: hidden;
-        position: relative;
-
-        &.-up {
-            background: rgba(52, 179, 73, 0.3);
-            color: #6ccf59;
-        }
-
-        &.-down {
-            background-color: rgba(240, 41, 52, 0.3);
-            color: #ff4d4d;
-        }
-    }
-
-    &__link {
-      color: #b9b9b9;
-      text-decoration: none;
-    }
+  &__link {
+    color: #b9b9b9;
+    text-decoration: none;
+  }
 }
 </style>

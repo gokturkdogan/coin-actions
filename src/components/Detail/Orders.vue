@@ -28,7 +28,7 @@
             </table>
         </div>
         <div class="orders__price" :class="priceDirection">
-            {{ price }} $
+            {{ formatDecimal(price) }} $
             <ArrowUpIcon class="orders__icon" v-if="priceDirection === 'up'" />
             <ArrowDownIcon class="orders__icon" v-else />
         </div>

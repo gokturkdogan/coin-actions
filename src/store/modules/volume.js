@@ -1,4 +1,5 @@
 import axios from 'axios';
+import localeStorageMethods from '../../mixins/localeStorage';
 
 const COINS = [
   'BTCUSDT', 'XRPUSDT', 'BCHUSDT', 'ETHUSDT',
@@ -134,8 +135,9 @@ const actions = {
         commit('setCoinData', { symbol, data: { liveKline } });
 
         if (liveKline.isFinal && liveKline.closeTime !== state.lastKlineCloseTime) {
+          console.log('mum kapandı eski mum saatleri değişecek')
           commit('setLastKlineCloseTime', liveKline.closeTime);
-          localStorage.removeItem(`previousKline_${symbol}`);
+          localeStorageMethods.methods.clearPreviousKlinesFromLocalStorage()
           dispatch('fetchPreviousKline', symbol);
         }
       } catch (e) {

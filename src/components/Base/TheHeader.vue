@@ -1,13 +1,14 @@
 <template>
-  <div class="header">
-    <HeaderLogo />
-    <div class="header__nav">
-      <router-link to="/login" class="header__link">ANASAYFA</router-link>
-      <router-link to="/login" class="header__link">COİN LİSTESİ</router-link>
-      <router-link to="/login" class="header__link">ÜYELİK PLANLARI</router-link>
-      <router-link to="/login" class="header__link">HESABIM</router-link>
+  <div class="header" :class="{'-scrolled': isScrolled }">
+    <div class="header__container">
+      <HeaderLogo />
+        <div class="header__nav">
+          <router-link to="/coin-actions/" class="header__link" :class="{ '-active': currentRoute === 'Home' }">ANASAYFA</router-link>
+          <router-link to="/coin-actions/coin-list" class="header__link" :class="{ '-active': currentRoute === 'Coins' }">COİN LİSTESİ</router-link>
+          <router-link to="/coin-actions/volume-list" class="header__link" :class="{ '-active': currentRoute === 'Volume' }">SAATLİK HACİM</router-link>
+        </div>
+        <!-- <router-link to="/login" class="header__button">Giriş Yap</router-link> -->
     </div>
-    <router-link to="/login" class="header__button">Giriş Yap</router-link>
   </div>
 </template>
 
@@ -18,16 +19,57 @@ export default {
   components: {
     HeaderLogo
   },
-  computed: {},
-};
+  props: {
+    currentRoute: {
+      type: String,
+      required: false,
+      default: 'Home'
+    }
+  },
+  data() {
+    return {
+      isScrolled: false
+    }
+  },
+  mounted() {
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
+  methods: {
+    handleScroll() {
+      this.isScrolled = window.scrollY > 80
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 .header {
+  position: fixed;
   display: flex;
   justify-content: space-between;
-  padding: 50px 400px;
   align-items: center;
+  width: 100%;
+  z-index: 100;
+  transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+  -webkit-transition: background-color 0.3s ease, -webkit-backdrop-filter 0.3s ease;
+
+  &.-scrolled {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: #ff3bd523;
+    box-shadow: 0 0 26px -5px #FF3BD4;
+  }
+
+  &__container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    padding: 20px 300px;
+  }
 
   &__nav {
     display: flex;
@@ -40,6 +82,11 @@ export default {
     color: #CCCEEF;
     text-decoration: none;
     transition: 0.3s;
+
+    &.-active {
+      color: #FF3BD4;
+      text-decoration: underline;
+    }
 
     &:not(:first-child) {
       margin-left: 40px;

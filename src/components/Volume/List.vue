@@ -81,7 +81,7 @@
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price -width" :class="{ '-active': activeOrder === 'volume' }">
+                    <td class="list__price" :class="{ '-active': activeOrder === 'volume' }">
                         <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
                         </span>
@@ -286,7 +286,7 @@ export default {
 
     &__title {
         color: #CCCEEF;
-        font-size: 16px;
+        font-size: 14px;
         text-align: center;
         position: relative;
         padding: 0 20px;
@@ -354,10 +354,10 @@ export default {
         border-radius: 20px;
         border: 1px solid rgba(47, 51, 109, 0.6);
         margin-bottom: 50px;
-        font-size: 14px;
+        font-size: 11px;
 
         thead {
-            font-size: 16px;
+            font-size: 11px;
 
             th {
                 cursor: pointer;
@@ -375,7 +375,7 @@ export default {
 
         th,
         td {
-            padding: 25px;
+            padding: 20px;
             border: none;
             outline: none;
 
@@ -486,7 +486,7 @@ export default {
         text-align: right;
 
         &.-width {
-            min: 120px;
+            min-width: 120px;
         }
 
         &.-colored {

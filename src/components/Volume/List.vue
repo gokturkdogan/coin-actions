@@ -25,6 +25,8 @@
                     <th class="list__change" @click="changeOrder('volume')"
                         :class="{ '-active': activeOrder === 'volume' }">Hacim<span class="list__tooltip">Güncel Mum
                             Anlık Hacim</span></th>
+                    <th class="list__change">Alış Hacim<span class="list__tooltip">Güncel Mum Alış Hacim</span></th>
+                    <th class="list__change">Satış Hacim<span class="list__tooltip">Güncel Mum Satış Hacim</span></th>
                     <th class="list__change" @click="changeOrder('change')"
                         :class="{ '-active': activeOrder === 'change' }">$ Değişim<span class="list__tooltip">1 Saatlik
                             Hacim Değişimi</span></th>
@@ -82,6 +84,18 @@
                     <td class="list__price -width" :class="{ '-active': activeOrder === 'volume' }">
                         <span v-if="coin.liveKline" class="list__currency">
                             <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price -colored -up">
+                        <span v-if="coin.liveKline" class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume * coin.liveKlineBuyPercent) || '-' }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price -colored -down">
+                        <span v-if="coin.liveKline" class="list__currency">
+                            <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume * coin.liveKlineSellPercent) || '-' }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>

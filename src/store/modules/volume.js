@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 const COINS = [
-  'BTCUSDT', 'XRPUSDT', 'BCHUSDT', 'ETHUSDT',
+  'IOSTUSDT', 'XRPUSDT', 'BCHUSDT', 'ETHUSDT',
   'SOLUSDT', 'BNBUSDT', 'BONKUSDT', 'GUNUSDT',
   'FLOKIUSDT', 'ACXUSDT', 'WIFUSDT', 'BOMEUSDT',
   'UNIUSDT', 'TURBOUSDT', 'ZENUSDT', 'ACHUSDT',
-  'NEIROUSDT', 'TONUSDT', 'DOGEUSDT', 'RAYUSDT',
+  'NEIROUSDT', 'TONUSDT','BTCUSDT', 'DOGEUSDT', 'RAYUSDT',
   '1MBABYDOGEUSDT', 'PNUTUSDT', 'EIGENUSDT', 'SYNUSDT',
   'RSRUSDT', 'SUPERUSDT', 'CFXUSDT', 'PEPEUSDT', 'WOOUSDT',
   'JUPUSDT', 'APEUSDT', 'TWTUSDT', 'FUNUSDT',
@@ -13,7 +13,7 @@ const COINS = [
   'HMSTRUSDT', 'MASKUSDT', 'ARBUSDT', 'ALTUSDT', 'AUCTIONUSDT',
   'PENGUUSDT', 'PENDLEUSDT', 'KAVAUSDT', 'APTUSDT', 'YFIUSDT',
   'WUSDT', 'SEIUSDT', 'SUIUSDT', 'JTOUSDT', 'TRUMPUSDT',
-  'TAOUSDT', 'BANANAUSDT', 'IOSTUSDT'
+  'TAOUSDT', 'BANANAUSDT'
 ];
 
 const state = () => ({
@@ -21,6 +21,7 @@ const state = () => ({
   socket: null,
   lastKlineCloseTime: null,
   fetchedCoins: [],
+  liveKlineFetchedCoins: []
 });
 
 const mutations = {
@@ -61,7 +62,13 @@ const mutations = {
 
   resetFetchedCoins(state) {
     state.fetchedCoins = [];
+  },
+
+  markLiveKlineFetched(state, symbol) {
+  if (!state.liveKlineFetchedCoins.includes(symbol)) {
+    state.liveKlineFetchedCoins.push(symbol);
   }
+},
 };
 
 const actions = {
@@ -93,55 +100,110 @@ const actions = {
     }
   },
   async fetchAggTradesForCoin({ commit, state }, { symbol, openTime, closeTime }) {
-  try {
-    const url = `https://api.binance.com/api/v3/aggTrades`;
-    const res = await axios.get(url, {
-      params: {
+    try {
+      const url = `https://api.binance.com/api/v3/aggTrades`;
+      const res = await axios.get(url, {
+        params: {
+          symbol,
+          startTime: openTime,
+          endTime: closeTime,
+          limit: 1000,
+        }
+      });
+      const trades = res.data;
+      let totalBuyVolume = 0;
+      let totalSellVolume = 0;
+      trades.forEach(trade => {
+        const qty = parseFloat(trade.q);
+        const price = parseFloat(trade.p);
+        const tradeVolume = qty * price;
+
+        if (trade.m) {
+          totalSellVolume += tradeVolume;
+        } else {
+          totalBuyVolume += tradeVolume;
+        }
+      });
+
+      const totalVolume = totalBuyVolume + totalSellVolume;
+      if (totalVolume === 0) {
+        console.log(`${symbol} AggTrades: Veri yok veya hacim sıfır.`);
+        return;
+      }
+
+      const buyPercent = totalBuyVolume / totalVolume;
+      const sellPercent = totalSellVolume / totalVolume;
+
+      commit('setCoinData', {
         symbol,
-        startTime: openTime,
-        endTime: closeTime,
-        limit: 1000,
-      }
-    });
+        data: {
+          previousKlineBuyPercent: buyPercent,
+          previousKlineSellPercent: sellPercent
+        }
+      });
 
-    const trades = res.data;
-    let totalBuyVolume = 0;
-    let totalSellVolume = 0;
-
-    trades.forEach(trade => {
-      const qty = parseFloat(trade.q);
-      const price = parseFloat(trade.p);
-      const tradeVolume = qty * price;
-
-      if (trade.m) {
-        totalSellVolume += tradeVolume;
-      } else {
-        totalBuyVolume += tradeVolume;
-      }
-    });
-
-    const totalVolume = totalBuyVolume + totalSellVolume;
-    if (totalVolume === 0) {
-      console.log(`${symbol} AggTrades: Veri yok veya hacim sıfır.`);
-      return;
+    } catch (e) {
+      console.error(`AggTrades isteği hata (${symbol}):`, e);
     }
+  },
+  async fetchAggTradesForCoinLiveKline({ commit, state }, { symbol }) {
+    console.log(symbol)
+    try {
+      const coin = state.coinData.find(c => c.symbol === symbol);
+      if (!coin || !coin.liveKline) return;
 
-    const buyPercent = totalBuyVolume / totalVolume;
-    const sellPercent = totalSellVolume / totalVolume;
+      const openTime = coin.liveKline.openTime;
+      const closeTime = Date.now();
 
-    // Coin objesine mutation ile setleme
-    commit('setCoinData', {
-      symbol,
-      data: {
-        previousKlineBuyPercent: buyPercent,
-        previousKlineSellPercent: sellPercent
+      const url = `https://api.binance.com/api/v3/aggTrades`;
+      const res = await axios.get(url, {
+        params: {
+          symbol,
+          startTime: openTime,
+          endTime: closeTime,
+          limit: 1000,
+        }
+      });
+
+      const trades = res.data;
+      let totalBuyVolume = 0;
+      let totalSellVolume = 0;
+
+      trades.forEach(trade => {
+        const qty = parseFloat(trade.q);
+        const price = parseFloat(trade.p);
+        const tradeVolume = qty * price;
+
+        if (trade.m) {
+          totalSellVolume += tradeVolume;
+        } else {
+          totalBuyVolume += tradeVolume;
+        }
+      });
+
+      const totalVolume = totalBuyVolume + totalSellVolume;
+      console.log(totalVolume)
+      if (!totalVolume) {
+        console.log(`${symbol} (LiveKline) AggTrades: Veri yok veya hacim sıfır.`);
+        return;
       }
-    });
 
-  } catch (e) {
-    console.error(`AggTrades isteği hata (${symbol}):`, e);
-  }
-},
+      const buyPercent = totalBuyVolume / totalVolume;
+      const sellPercent = totalSellVolume / totalVolume;
+      console.log(buyPercent)
+      console.log(sellPercent)
+      commit('setCoinData', {
+        symbol,
+        data: {
+          liveKlineBuyPercent: buyPercent,
+          liveKlineSellPercent: sellPercent
+        }
+      });
+
+    } catch (e) {
+      console.error(`AggTrades (LiveKline) isteği hata (${symbol}):`, e);
+    }
+  },
 
   connectKlineSocket({ commit, dispatch, state }) {
     if (state.socket) {
@@ -171,6 +233,10 @@ const actions = {
         };
 
         commit('setCoinData', { symbol, data: { liveKline } });
+        if (!state.liveKlineFetchedCoins.includes(symbol)) {
+          dispatch('fetchAggTradesForCoinLiveKline', { symbol });
+          commit('markLiveKlineFetched', symbol);
+        }
 
         if (liveKline.isFinal && liveKline.closeTime !== state.lastKlineCloseTime) {
           console.log('mum kapandı eski mum saatleri değişecek')

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import localeStorageMethods from '../../mixins/localeStorage';
 
 const COINS = [
   'BTCUSDT', 'XRPUSDT', 'BCHUSDT', 'ETHUSDT',
@@ -68,18 +67,6 @@ const mutations = {
 const actions = {
   async fetchPreviousKline({ commit, state }, symbol) {
     if (state.fetchedCoins.includes(symbol)) return;
-    const cachedData = localStorage.getItem(`previousKline_${symbol}`);
-    if (cachedData) {
-      try {
-        const parsed = JSON.parse(cachedData);
-        commit('setCoinData', { symbol, data: { previousKline: parsed } });
-        commit('setLastKlineCloseTime', parsed.closeTime);
-        commit('markCoinAsFetched', symbol);
-        return;
-      } catch (e) {
-        console.warn(`LocalStorage parse hatası (${symbol}):`, e);
-      }
-    }
     try {
       const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=2`;
       const res = await axios.get(url);
@@ -94,7 +81,6 @@ const actions = {
       commit('setCoinData', { symbol, data: { previousKline } });
       commit('setLastKlineCloseTime', previousKline.closeTime);
       commit('markCoinAsFetched', symbol);
-      localStorage.setItem(`previousKline_${symbol}`, JSON.stringify(previousKline));
     } catch (e) {
       console.error(`fetchPreviousKline hata (${symbol}):`, e);
     }
@@ -137,7 +123,6 @@ const actions = {
         if (liveKline.isFinal && liveKline.closeTime !== state.lastKlineCloseTime) {
           console.log('mum kapandı eski mum saatleri değişecek')
           commit('setLastKlineCloseTime', liveKline.closeTime);
-          localeStorageMethods.methods.clearPreviousKlinesFromLocalStorage()
           dispatch('fetchPreviousKline', symbol);
         }
       } catch (e) {

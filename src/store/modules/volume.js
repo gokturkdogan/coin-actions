@@ -65,7 +65,7 @@ const mutations = {
 };
 
 const actions = {
-  async fetchPreviousKline({ commit, state }, symbol) {
+  async fetchPreviousKline({ commit, state, dispatch }, symbol) {
     if (state.fetchedCoins.includes(symbol)) return;
     try {
       const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=2`;
@@ -81,6 +81,7 @@ const actions = {
       commit('setCoinData', { symbol, data: { previousKline } });
       commit('setLastKlineCloseTime', previousKline.closeTime);
       commit('markCoinAsFetched', symbol);
+      dispatch('fetchAggTradesForCoin', { symbol, openTime: previousKline.openTime, closeTime: previousKline.closeTime });
     } catch (e) {
       console.error(`fetchPreviousKline hata (${symbol}):`, e);
     }
@@ -91,6 +92,57 @@ const actions = {
       await new Promise(res => setTimeout(res, 300));
     }
   },
+  async fetchAggTradesForCoin({ commit, state }, { symbol, openTime, closeTime }) {
+  try {
+    const url = `https://api.binance.com/api/v3/aggTrades`;
+    const res = await axios.get(url, {
+      params: {
+        symbol,
+        startTime: openTime,
+        endTime: closeTime,
+        limit: 1000,
+      }
+    });
+
+    const trades = res.data;
+    let totalBuyVolume = 0;
+    let totalSellVolume = 0;
+
+    trades.forEach(trade => {
+      const qty = parseFloat(trade.q);
+      const price = parseFloat(trade.p);
+      const tradeVolume = qty * price;
+
+      if (trade.m) {
+        totalSellVolume += tradeVolume;
+      } else {
+        totalBuyVolume += tradeVolume;
+      }
+    });
+
+    const totalVolume = totalBuyVolume + totalSellVolume;
+    if (totalVolume === 0) {
+      console.log(`${symbol} AggTrades: Veri yok veya hacim sıfır.`);
+      return;
+    }
+
+    const buyPercent = totalBuyVolume / totalVolume;
+    const sellPercent = totalSellVolume / totalVolume;
+
+    // Coin objesine mutation ile setleme
+    commit('setCoinData', {
+      symbol,
+      data: {
+        previousKlineBuyPercent: buyPercent,
+        previousKlineSellPercent: sellPercent
+      }
+    });
+
+  } catch (e) {
+    console.error(`AggTrades isteği hata (${symbol}):`, e);
+  }
+},
+
   connectKlineSocket({ commit, dispatch, state }) {
     if (state.socket) {
       console.log('Saatlik hacim websocket zaten açık, kapatılıyor...');

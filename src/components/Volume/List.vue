@@ -19,6 +19,8 @@
                     <th class="list__name">Açılış<span class="list__tooltip">Geçmiş Mum Açılış Saati</span></th>
                     <th class="list__name">Kapanış<span class="list__tooltip">Geçmiş Mum Kapanış Saati</span></th>
                     <th class="list__name">Hacim<span class="list__tooltip">Geçmiş Mum Hacim</span></th>
+                    <th class="list__name">Alış Hacim<span class="list__tooltip">Geçmiş Mum Alış Hacim</span></th>
+                    <th class="list__name">Satış Hacim<span class="list__tooltip">Geçmiş Mum Satış Hacim</span></th>
                     <th class="list__change">Açılış<span class="list__tooltip">Güncel Mum Açılış saati</span></th>
                     <th class="list__change" @click="changeOrder('volume')"
                         :class="{ '-active': activeOrder === 'volume' }">Hacim<span class="list__tooltip">Güncel Mum
@@ -55,6 +57,18 @@
                     <td class="list__price">
                         <span v-if="coin.previousKline" class="list__symbol">
                             <DollarIcon />{{ formatDecimal(coin.previousKline.quoteAssetVolume) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price -colored -up">
+                        <span v-if="coin.previousKlineBuyPercent" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKlineBuyPercent * coin.previousKline.quoteAssetVolume) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price -colored -down">
+                        <span v-if="coin.previousKlineSellPercent" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.previousKlineSellPercent * coin.previousKline.quoteAssetVolume) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>

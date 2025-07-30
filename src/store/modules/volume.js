@@ -88,7 +88,6 @@ const actions = {
       commit('setCoinData', { symbol, data: { previousKline } });
       commit('setLastKlineCloseTime', previousKline.closeTime);
       commit('markCoinAsFetched', symbol);
-      dispatch('fetchAggTradesForCoin', { symbol, openTime: previousKline.openTime, closeTime: previousKline.closeTime });
     } catch (e) {
       console.error(`fetchPreviousKline hata (${symbol}):`, e);
     }
@@ -97,111 +96,6 @@ const actions = {
     for (const symbol of COINS) {
       await dispatch('fetchPreviousKline', symbol);
       await new Promise(res => setTimeout(res, 300));
-    }
-  },
-  async fetchAggTradesForCoin({ commit, state }, { symbol, openTime, closeTime }) {
-    try {
-      const url = `https://api.binance.com/api/v3/aggTrades`;
-      const res = await axios.get(url, {
-        params: {
-          symbol,
-          startTime: openTime,
-          endTime: closeTime,
-          limit: 1000,
-        }
-      });
-      const trades = res.data;
-      let totalBuyVolume = 0;
-      let totalSellVolume = 0;
-      trades.forEach(trade => {
-        const qty = parseFloat(trade.q);
-        const price = parseFloat(trade.p);
-        const tradeVolume = qty * price;
-
-        if (trade.m) {
-          totalSellVolume += tradeVolume;
-        } else {
-          totalBuyVolume += tradeVolume;
-        }
-      });
-
-      const totalVolume = totalBuyVolume + totalSellVolume;
-      if (totalVolume === 0) {
-        console.log(`${symbol} AggTrades: Veri yok veya hacim sıfır.`);
-        return;
-      }
-
-      const buyPercent = totalBuyVolume / totalVolume;
-      const sellPercent = totalSellVolume / totalVolume;
-
-      commit('setCoinData', {
-        symbol,
-        data: {
-          previousKlineBuyPercent: buyPercent,
-          previousKlineSellPercent: sellPercent
-        }
-      });
-
-    } catch (e) {
-      console.error(`AggTrades isteği hata (${symbol}):`, e);
-    }
-  },
-  async fetchAggTradesForCoinLiveKline({ commit, state }, { symbol }) {
-    console.log(symbol)
-    try {
-      const coin = state.coinData.find(c => c.symbol === symbol);
-      if (!coin || !coin.liveKline) return;
-
-      const openTime = coin.liveKline.openTime;
-      const closeTime = Date.now();
-
-      const url = `https://api.binance.com/api/v3/aggTrades`;
-      const res = await axios.get(url, {
-        params: {
-          symbol,
-          startTime: openTime,
-          endTime: closeTime,
-          limit: 1000,
-        }
-      });
-
-      const trades = res.data;
-      let totalBuyVolume = 0;
-      let totalSellVolume = 0;
-
-      trades.forEach(trade => {
-        const qty = parseFloat(trade.q);
-        const price = parseFloat(trade.p);
-        const tradeVolume = qty * price;
-
-        if (trade.m) {
-          totalSellVolume += tradeVolume;
-        } else {
-          totalBuyVolume += tradeVolume;
-        }
-      });
-
-      const totalVolume = totalBuyVolume + totalSellVolume;
-      console.log(totalVolume)
-      if (!totalVolume) {
-        console.log(`${symbol} (LiveKline) AggTrades: Veri yok veya hacim sıfır.`);
-        return;
-      }
-
-      const buyPercent = totalBuyVolume / totalVolume;
-      const sellPercent = totalSellVolume / totalVolume;
-      console.log(buyPercent)
-      console.log(sellPercent)
-      commit('setCoinData', {
-        symbol,
-        data: {
-          liveKlineBuyPercent: buyPercent,
-          liveKlineSellPercent: sellPercent
-        }
-      });
-
-    } catch (e) {
-      console.error(`AggTrades (LiveKline) isteği hata (${symbol}):`, e);
     }
   },
 
@@ -234,7 +128,6 @@ const actions = {
 
         commit('setCoinData', { symbol, data: { liveKline } });
         if (!state.liveKlineFetchedCoins.includes(symbol)) {
-          dispatch('fetchAggTradesForCoinLiveKline', { symbol });
           commit('markLiveKlineFetched', symbol);
         }
 

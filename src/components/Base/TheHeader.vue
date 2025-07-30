@@ -6,6 +6,7 @@
           <router-link to="/coin-actions/" class="header__link" :class="{ '-active': currentRoute === 'Home' }">ANASAYFA</router-link>
           <router-link to="/coin-actions/coin-list" class="header__link" :class="{ '-active': currentRoute === 'Coins' }">COİN LİSTESİ</router-link>
           <router-link to="/coin-actions/volume-list" class="header__link" :class="{ '-active': currentRoute === 'Volume' }">SAATLİK HACİM</router-link>
+          <router-link to="/coin-actions/trade-volume" class="header__link" :class="{ '-active': currentRoute === 'TradeVolume' }">TRADE HACİM</router-link>
         </div>
         <!-- <router-link to="/login" class="header__button">Giriş Yap</router-link> -->
     </div>

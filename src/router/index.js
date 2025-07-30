@@ -3,6 +3,7 @@ import Home from '@/layout/Main.vue'
 import Coins from '@/layout/List.vue'
 import Detail from '@/layout/Detail.vue'
 import Volume from '@/layout/Volume.vue'
+import TradeVolume from '@/layout/TradeVolume.vue'
 
 const routes = [
   {
@@ -28,6 +29,12 @@ const routes = [
     path: '/coin-actions/volume-list',
     name: 'Volume',
     component: Volume,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/coin-actions/trade-volume',
+    name: 'TradeVolume',
+    component: TradeVolume,
     meta: { requiresAuth: false }
   }
 ]

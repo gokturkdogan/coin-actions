@@ -15,14 +15,28 @@
         <table class="list__table">
             <thead>
                 <tr>
+                    <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name">Hacim<span class="list__tooltip">30 Dk'lık Toplam Hacim</span></th>
-                    <th class="list__name">Alış<span class="list__tooltip">30 Dk'lık Alış Hacim</span></th>
-                    <th class="list__name">Satış<span class="list__tooltip">30 Dk'lık Satış Hacim</span></th>
+                    <th class="list__name" @click="changeOrder('volume')">Hacim<span class="list__tooltip">30 Dk'lık
+                            Toplam Hacim</span></th>
+                    <th class="list__name" @click="changeOrder('buy')">Alış<span class="list__tooltip">30 Dk'lık Alış
+                            Hacim</span></th>
+                    <th class="list__name" @click="changeOrder('sell')">Satış<span class="list__tooltip">30 Dk'lık Satış
+                            Hacim</span></th>
+                    <th class="list__name" @click="changeOrder('buyPercent')">Alış %<span class="list__tooltip">30
+                            Dk'lık Alış Yüzdelik Hacim</span></th>
+                    <th class="list__name" @click="changeOrder('sellPercent')">Satış %<span class="list__tooltip">30
+                            Dk'lık Satış Yüzdelik Hacim</span></th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" v-for="coin in volumes" :key="coin.symbol" :class="{ '-up': coin.isUp }">
+                <tr class="list__item" v-for="(coin, index) in volumes" :key="coin.symbol"
+                    :class="{ '-up': coin.isUp }">
+                    <td class="list__name">
+                        <span class="list__symbol">
+                            {{ index + 1 }}
+                        </span>
+                    </td>
                     <td class="list__name">
                         <span class="list__symbol">
                             {{ symbolFormatter(coin.symbol) }}
@@ -43,6 +57,20 @@
                     <td class="list__price">
                         <span v-if="coin.sellVolume" class="list__symbol -down">
                             <DollarIcon />{{ formatDecimal(coin.sellVolume + coin.liveSell) }}
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price">
+                        <span v-if="coin.sellVolume" class="list__percent -up">
+                            {{ percentFormatter((100 * (coin.buyVolume + coin.liveBuy)) / (coin.volume30m +
+                                coin.liveSell + coin.liveBuy)) }} %
+                        </span>
+                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
+                    </td>
+                    <td class="list__price">
+                        <span v-if="coin.sellVolume" class="list__percent -down">
+                            {{ percentFormatter((100 * (coin.sellVolume + coin.liveSell)) / (coin.volume30m +
+                                coin.liveSell + coin.liveBuy)) }} %
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
@@ -71,7 +99,6 @@ export default {
             searchText: '',
             destination: 'up',
             activeOrder: 'volume',
-            previousVolumes: {} // symbol: previousQuoteAssetVolume
         };
     },
     components: {
@@ -92,19 +119,52 @@ export default {
         changeOrder(value) {
             this.activeOrder = value;
         },
-        markIsUp(coin) {
-            if (!coin) return;
-
-            coin.isUp = true;
-            clearTimeout(coin._upTimer);
-            coin._upTimer = setTimeout(() => {
-                coin.isUp = false;
-            }, 1000); // 1 saniye sonra isUp: false yapılır
-        }
     },
     computed: {
         volumes() {
-            return this.$store.getters['tradeVolume/getCoinData']
+            const data = this.$store.getters['tradeVolume/getCoinData'] || [];
+
+            return [...data].sort((a, b) => {
+                const getSafe = (v) => v || 0;
+
+                const aVolume = getSafe(a.volume30m) + getSafe(a.liveBuy) + getSafe(a.liveSell);
+                const bVolume = getSafe(b.volume30m) + getSafe(b.liveBuy) + getSafe(b.liveSell);
+
+                const aBuy = getSafe(a.buyVolume) + getSafe(a.liveBuy);
+                const bBuy = getSafe(b.buyVolume) + getSafe(b.liveBuy);
+
+                const aSell = getSafe(a.sellVolume) + getSafe(a.liveSell);
+                const bSell = getSafe(b.sellVolume) + getSafe(b.liveSell);
+
+                let valueA = 0;
+                let valueB = 0;
+
+                switch (this.activeOrder) {
+                    case 'buy':
+                        valueA = aBuy;
+                        valueB = bBuy;
+                        break;
+                    case 'sell':
+                        valueA = aSell;
+                        valueB = bSell;
+                        break;
+                    case 'buyPercent':
+                        valueA = aVolume > 0 ? (100 * aBuy) / aVolume : 0;
+                        valueB = bVolume > 0 ? (100 * bBuy) / bVolume : 0;
+                        break;
+                    case 'sellPercent':
+                        valueA = aVolume > 0 ? (100 * aSell) / aVolume : 0;
+                        valueB = bVolume > 0 ? (100 * bSell) / bVolume : 0;
+                        break;
+                    default: // 'volume'
+                        valueA = aVolume;
+                        valueB = bVolume;
+                }
+
+                return this.destination === 'down'
+                    ? valueA - valueB
+                    : valueB - valueA;
+            });
         }
     }
 };
@@ -291,7 +351,7 @@ export default {
     }
 
     &__name {
-        min-width: 300px;
+        min-width: 200px;
         text-align: left;
         position: relative;
     }
@@ -322,6 +382,26 @@ export default {
             color: #ff4d4d;
         }
 
+    }
+
+    &__percent {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 7px;
+        border-radius: 8px;
+        width: fit-content;
+        height: 30px;
+
+        &.-up {
+            background: rgba(52, 179, 73, 0.1);
+            color: #6ccf59;
+        }
+
+        &.-down {
+            background-color: rgba(240, 41, 52, 0.3);
+            color: #ff4d4d;
+        }
     }
 
     &__clock {

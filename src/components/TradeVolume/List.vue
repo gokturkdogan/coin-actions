@@ -17,15 +17,15 @@
                 <tr>
                     <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name" @click="changeOrder('volume')">Hacim<span class="list__tooltip">30 Dk'lık
+                    <th class="list__name" :class="{ '-active': activeOrder === 'volume' }" @click="changeOrder('volume')">Hacim<span class="list__tooltip">30 Dk'lık
                             Toplam Hacim</span></th>
-                    <th class="list__name" @click="changeOrder('buy')">Alış<span class="list__tooltip">30 Dk'lık Alış
+                    <th class="list__name" :class="{ '-active': activeOrder === 'buy' }" @click="changeOrder('buy')">Alış<span class="list__tooltip">30 Dk'lık Alış
                             Hacim</span></th>
-                    <th class="list__name" @click="changeOrder('sell')">Satış<span class="list__tooltip">30 Dk'lık Satış
+                    <th class="list__name" :class="{ '-active': activeOrder === 'sell' }" @click="changeOrder('sell')">Satış<span class="list__tooltip">30 Dk'lık Satış
                             Hacim</span></th>
-                    <th class="list__name" @click="changeOrder('buyPercent')">Alış %<span class="list__tooltip">30
+                    <th class="list__name" :class="{ '-active': activeOrder === 'buyPercent' }" @click="changeOrder('buyPercent')">Alış %<span class="list__tooltip">30
                             Dk'lık Alış Yüzdelik Hacim</span></th>
-                    <th class="list__name" @click="changeOrder('sellPercent')">Satış %<span class="list__tooltip">30
+                    <th class="list__name" :class="{ '-active': activeOrder === 'sellPercent' }" @click="changeOrder('sellPercent')">Satış %<span class="list__tooltip">30
                             Dk'lık Satış Yüzdelik Hacim</span></th>
                 </tr>
             </thead>
@@ -42,32 +42,32 @@
                             {{ symbolFormatter(coin.symbol) }}
                         </span>
                     </td>
-                    <td class="list__name">
+                    <td class="list__name" :class="{ '-active': activeOrder === 'volume' }">
                         <span v-if="coin.volume30m" class="list__symbol">
                             <DollarIcon />{{ formatDecimal(coin.volume30m + coin.liveSell + coin.liveBuy) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__name">
+                    <td class="list__name" :class="{ '-active': activeOrder === 'buy' }">
                         <span v-if="coin.buyVolume" class="list__symbol -up">
                             <DollarIcon />{{ formatDecimal(coin.buyVolume + coin.liveBuy) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price">
+                    <td class="list__price" :class="{ '-active': activeOrder === 'sell' }">
                         <span v-if="coin.sellVolume" class="list__symbol -down">
                             <DollarIcon />{{ formatDecimal(coin.sellVolume + coin.liveSell) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price">
+                    <td class="list__price" :class="{ '-active': activeOrder === 'buyPercent' }">
                         <span v-if="coin.sellVolume" class="list__percent -up">
                             {{ percentFormatter((100 * (coin.buyVolume + coin.liveBuy)) / (coin.volume30m +
                                 coin.liveSell + coin.liveBuy)) }} %
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price">
+                    <td class="list__price" :class="{ '-active': activeOrder === 'sellPercent' }">
                         <span v-if="coin.sellVolume" class="list__percent -down">
                             {{ percentFormatter((100 * (coin.sellVolume + coin.liveSell)) / (coin.volume30m +
                                 coin.liveSell + coin.liveBuy)) }} %

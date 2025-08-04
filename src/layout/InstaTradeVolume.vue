@@ -1,14 +1,14 @@
 <template>
   <div class="volume">
     <TheHeader :current-route="currentRoute"/>
-    <Volume />
+    <InstaTradeVolume />
     <TheFooter />
   </div>
 </template>
 
 <script>
 import TheHeader from '../components/Base/TheHeader.vue'
-import Volume from '../views/Volume.vue'
+import InstaTradeVolume from '../views/InstaTradeVolume.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
 export default {
   name: "spot-layout",
@@ -17,7 +17,7 @@ export default {
   },
   components: {
     TheHeader,
-    Volume,
+    InstaTradeVolume,
     TheFooter
   },
   created() { },

@@ -10,86 +10,67 @@
                 <ArrowUp2 v-if="destination === 'up'" @click="changeDestination('down')" />
                 <ArrowDown2 v-else @click="changeDestination('up')" />
             </div>
-            <h2 class="list__title">SAATLİK HACİM TAKİBİ</h2>
+            <h2 class="list__title">ALIŞ SATIŞ HACİM VADELİ (30dk)</h2>
         </div>
         <table class="list__table">
             <thead>
                 <tr>
+                    <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name">Açılış<span class="list__tooltip">Geçmiş Mum Açılış Saati</span></th>
-                    <th class="list__name">Kapanış<span class="list__tooltip">Geçmiş Mum Kapanış Saati</span></th>
-                    <th class="list__name">Hacim<span class="list__tooltip">Geçmiş Mum Hacim</span></th>
-                    <th class="list__change">Açılış<span class="list__tooltip">Güncel Mum Açılış saati</span></th>
-                    <th class="list__change" @click="changeOrder('volume')"
-                        :class="{ '-active': activeOrder === 'volume' }">Hacim<span class="list__tooltip">Güncel Mum
-                            Anlık Hacim</span></th>
-                    <th class="list__change" @click="changeOrder('change')"
-                        :class="{ '-active': activeOrder === 'change' }">$ Değişim<span class="list__tooltip">1 Saatlik
-                            Hacim Değişimi</span></th>
-                    <th class="list__change" @click="changeOrder('percent')"
-                        :class="{ '-active': activeOrder === 'percent' }">% Değişim<span class="list__tooltip">1 Saatlik
-                            Hacim Yüzdelik Değişimi</span></th>
+                    <th class="list__name" :class="{ '-active': activeOrder === 'volume' }" @click="changeOrder('volume')">Hacim<span class="list__tooltip">30 Dk'lık
+                            Toplam Hacim</span></th>
+                    <th class="list__name" :class="{ '-active': activeOrder === 'buy' }" @click="changeOrder('buy')">Alış<span class="list__tooltip">30 Dk'lık Alış
+                            Hacim</span></th>
+                    <th class="list__name" :class="{ '-active': activeOrder === 'sell' }" @click="changeOrder('sell')">Satış<span class="list__tooltip">30 Dk'lık Satış
+                            Hacim</span></th>
+                    <th class="list__name" :class="{ '-active': activeOrder === 'buyPercent' }" @click="changeOrder('buyPercent')">Alış %<span class="list__tooltip">30
+                            Dk'lık Alış Yüzdelik Hacim</span></th>
+                    <th class="list__name" :class="{ '-active': activeOrder === 'sellPercent' }" @click="changeOrder('sellPercent')">Satış %<span class="list__tooltip">30
+                            Dk'lık Satış Yüzdelik Hacim</span></th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="list__item" v-for="coin in volumes" :key="coin.symbol" :class="{ '-up': coin.isUp }">
+                <tr class="list__item" v-for="(coin, index) in volumes" :key="coin.symbol"
+                    :class="{ '-up': coin.isUp }">
+                    <td class="list__name">
+                        <span class="list__symbol">
+                            {{ index + 1 }}
+                        </span>
+                    </td>
                     <td class="list__name">
                         <span class="list__symbol">
                             {{ symbolFormatter(coin.symbol) }}
                         </span>
                     </td>
-                    <td class="list__name">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <Clock class="list__clock" />
-                            {{ formatTime(coin.previousKline.openTime) }}
+                    <td class="list__name" :class="{ '-active': activeOrder === 'volume' }">
+                        <span v-if="coin.liveSell" class="list__symbol">
+                            <DollarIcon />{{ formatDecimal(coin.liveSell + coin.liveBuy) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__name">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <Clock class="list__clock -red" />
-                            {{ formatTime(coin.previousKline.closeTime) }}
+                    <td class="list__name" :class="{ '-active': activeOrder === 'buy' }">
+                        <span v-if="coin.liveBuy" class="list__symbol -up">
+                            <DollarIcon />{{ formatDecimal(coin.liveBuy) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price">
-                        <span v-if="coin.previousKline" class="list__symbol">
-                            <DollarIcon />{{ formatDecimal(coin.previousKline.quoteAssetVolume) }}
+                    <td class="list__price" :class="{ '-active': activeOrder === 'sell' }">
+                        <span v-if="coin.liveSell" class="list__symbol -down">
+                            <DollarIcon />{{ formatDecimal(coin.liveSell) }}
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price">
-                        <span v-if="coin.liveKline" class="list__currency">
-                            <Clock class="list__clock" />
-                            {{ formatTime(coin.liveKline?.openTime) || '-' }}
+                    <td class="list__price" :class="{ '-active': activeOrder === 'buyPercent' }">
+                        <span v-if="coin.liveBuy" class="list__percent -up">
+                            {{ percentFormatter((100 * (coin.liveBuy)) / (
+                                coin.liveSell + coin.liveBuy)) }} %
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
-                    <td class="list__price" :class="{ '-active': activeOrder === 'volume' }">
-                        <span v-if="coin.liveKline" class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume) || '-' }}
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__price -colored"
-                        :class="{ '-up': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0, '-down': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume < 0, '-active': activeOrder === 'change' }">
-                        <span v-if="coin.liveKline" class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.liveKline?.quoteAssetVolume -
-                                coin.previousKline?.quoteAssetVolume) }}
-                            <ArrowUp v-if="coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0"
-                                class="list__icon" />
-                            <ArrowDown v-else class="list__icon" />
-                        </span>
-                        <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
-                    </td>
-                    <td class="list__price -colored"
-                        :class="{ '-up': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0, '-down': coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume < 0, '-active': activeOrder === 'percent' }">
-                        <span v-if="coin.liveKline && coin.previousKline" class="list__currency">
-                            {{ percentFormatter((coin.liveKline?.quoteAssetVolume -
-                                coin.previousKline?.quoteAssetVolume) * 100 / coin.previousKline?.quoteAssetVolume) }}%
-                            <ArrowUp v-if="coin.liveKline?.quoteAssetVolume - coin.previousKline?.quoteAssetVolume > 0"
-                                class="list__icon" />
-                            <ArrowDown v-else class="list__icon" />
+                    <td class="list__price" :class="{ '-active': activeOrder === 'sellPercent' }">
+                        <span v-if="coin.liveSell" class="list__percent -down">
+                            {{ percentFormatter((100 * (coin.liveSell)) / (
+                                coin.liveSell + coin.liveBuy)) }} %
                         </span>
                         <img v-else src="../../assets/images/gifs/spinner.gif" alt="spinner" class="list__spinner">
                     </td>
@@ -118,7 +99,6 @@ export default {
             searchText: '',
             destination: 'up',
             activeOrder: 'volume',
-            previousVolumes: {} // symbol: previousQuoteAssetVolume
         };
     },
     components: {
@@ -139,64 +119,51 @@ export default {
         changeOrder(value) {
             this.activeOrder = value;
         },
-        markIsUp(coin) {
-            if (!coin) return;
-
-            coin.isUp = true;
-            clearTimeout(coin._upTimer);
-            coin._upTimer = setTimeout(() => {
-                coin.isUp = false;
-            }, 1000); // 1 saniye sonra isUp: false yapılır
-        }
     },
     computed: {
         volumes() {
-            const data = this.$store.getters['volume/getCoinData'] || [];
+            const data = this.$store.getters['instaFutureTradeVolume/getCoinData'] || [];
 
-            return [...data].map(coin => {
-                const symbol = coin.symbol;
-                const currentVolume = Number(coin?.liveKline?.quoteAssetVolume ?? 0);
-                const prevVolume = this.previousVolumes[symbol] ?? currentVolume;
+            return [...data].sort((a, b) => {
+                const getSafe = (v) => v || 0;
 
-                if (currentVolume > prevVolume) {
-                    this.markIsUp(coin);
+                const aVolume = getSafe(a.volume30m) + getSafe(a.liveBuy) + getSafe(a.liveSell);
+                const bVolume = getSafe(b.volume30m) + getSafe(b.liveBuy) + getSafe(b.liveSell);
+
+                const aBuy = getSafe(a.buyVolume) + getSafe(a.liveBuy);
+                const bBuy = getSafe(b.buyVolume) + getSafe(b.liveBuy);
+
+                const aSell = getSafe(a.sellVolume) + getSafe(a.liveSell);
+                const bSell = getSafe(b.sellVolume) + getSafe(b.liveSell);
+
+                let valueA = 0;
+                let valueB = 0;
+
+                switch (this.activeOrder) {
+                    case 'buy':
+                        valueA = aBuy;
+                        valueB = bBuy;
+                        break;
+                    case 'sell':
+                        valueA = aSell;
+                        valueB = bSell;
+                        break;
+                    case 'buyPercent':
+                        valueA = aVolume > 0 ? (100 * aBuy) / aVolume : 0;
+                        valueB = bVolume > 0 ? (100 * bBuy) / bVolume : 0;
+                        break;
+                    case 'sellPercent':
+                        valueA = aVolume > 0 ? (100 * aSell) / aVolume : 0;
+                        valueB = bVolume > 0 ? (100 * bSell) / bVolume : 0;
+                        break;
+                    default: // 'volume'
+                        valueA = aVolume;
+                        valueB = bVolume;
                 }
-
-                this.previousVolumes[symbol] = currentVolume;
-
-                return coin;
-            }).sort((a, b) => {
-                let valA = 0;
-                let valB = 0;
-
-                if (this.activeOrder === 'volume') {
-                    valA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
-                    valB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
-                } else if (this.activeOrder === 'change') {
-                    const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
-                    const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
-                    valA = currentA - prevA;
-
-                    const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
-                    const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
-                    valB = currentB - prevB;
-                } else if (this.activeOrder === 'percent') {
-                    const currentA = Number(a?.liveKline?.quoteAssetVolume ?? 0);
-                    const prevA = Number(a?.previousKline?.quoteAssetVolume ?? 0);
-                    valA = prevA !== 0 ? ((currentA - prevA) / prevA) * 100 : 0;
-
-                    const currentB = Number(b?.liveKline?.quoteAssetVolume ?? 0);
-                    const prevB = Number(b?.previousKline?.quoteAssetVolume ?? 0);
-                    valB = prevB !== 0 ? ((currentB - prevB) / prevB) * 100 : 0;
-                }
-
-                if (isNaN(valA) && isNaN(valB)) return 0;
-                if (isNaN(valA)) return 1;
-                if (isNaN(valB)) return -1;
 
                 return this.destination === 'down'
-                    ? valA - valB
-                    : valB - valA;
+                    ? valueA - valueB
+                    : valueB - valueA;
             });
         }
     }
@@ -326,10 +293,10 @@ export default {
         border-radius: 20px;
         border: 1px solid rgba(47, 51, 109, 0.6);
         margin-bottom: 50px;
-        font-size: 11px;
+        font-size: 14px;
 
         thead {
-            font-size: 11px;
+            font-size: 14px;
 
             th {
                 cursor: pointer;
@@ -384,6 +351,7 @@ export default {
     }
 
     &__name {
+        min-width: 200px;
         text-align: left;
         position: relative;
     }
@@ -414,6 +382,26 @@ export default {
             color: #ff4d4d;
         }
 
+    }
+
+    &__percent {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 7px;
+        border-radius: 8px;
+        width: fit-content;
+        height: 30px;
+
+        &.-up {
+            background: rgba(52, 179, 73, 0.1);
+            color: #6ccf59;
+        }
+
+        &.-down {
+            background-color: rgba(240, 41, 52, 0.3);
+            color: #ff4d4d;
+        }
     }
 
     &__clock {

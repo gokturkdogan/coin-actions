@@ -3,13 +3,15 @@
     <img class="volume__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="volume__content">
       <List v-if="volumes"/>
+      <ListFuture v-if="volumes"/>
     </div>
     <img class="volume__divider" src="../assets/images/backgorunds/divider.svg" alt="">
   </div>
 </template>
 
 <script>
-import List from '../components/Volume/List.vue';
+import List from '../components/InstaTradeVolume/List.vue';
+import ListFuture from '../components/InstaTradeVolume/ListFuture.vue';
 
 export default {
   name: "volume",
@@ -17,17 +19,23 @@ export default {
     return {}
   },
   components: {
-    List
+    List,
+    ListFuture
   },
   created() {
-    this.$store.dispatch('volume/connectKlineSocket');
+    this.$store.dispatch('instaTradeVolume/startAggTradeSocket');
+    this.$store.dispatch('instaFutureTradeVolume/startAggTradeSocket');
   },
   beforeUnmount() {
-    this.$store.dispatch('volume/disconnectKlineSocket');
+    this.$store.dispatch('instaTradeVolume/stopAggTradeSocket');
+    this.$store.dispatch('instaFutureTradeVolume/stopAggTradeSocket');
   },
   computed: {
     volumes() {
-      return this.$store.getters['volume/getCoinData']
+      return this.$store.getters['instaTradeVolume/getCoinData']
+    },
+    volumesFuture() {
+      return this.$store.getters['instaFutureTradeVolume/getCoinData']
     }
   }
 };
@@ -48,6 +56,8 @@ export default {
       margin-top: 10px;
       display: flex;
       justify-content: center;
+      align-items: center;
+      flex-direction: column;
       padding: 0 100px;
       color: white;
     }

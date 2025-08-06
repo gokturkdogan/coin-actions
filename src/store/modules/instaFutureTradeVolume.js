@@ -1,5 +1,5 @@
 const COINS = [
-  'BTCUSDT'
+  'MYXUSDT'
 ];
 
 const state = () => ({

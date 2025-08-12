@@ -2,7 +2,6 @@
   <div class="volume">
     <img class="volume__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="volume__content">
-      <List v-if="volumes"/>
       <ListFuture v-if="volumes"/>
     </div>
     <img class="volume__divider" src="../assets/images/backgorunds/divider.svg" alt="">
@@ -10,7 +9,6 @@
 </template>
 
 <script>
-import List from '../components/InstaTradeVolume/List.vue';
 import ListFuture from '../components/InstaTradeVolume/ListFuture.vue';
 
 export default {
@@ -19,7 +17,6 @@ export default {
     return {}
   },
   components: {
-    List,
     ListFuture
   },
   created() {

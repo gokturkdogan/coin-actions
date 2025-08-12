@@ -32,8 +32,8 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
-    path: '/coin-actions/deneme',
-    name: 'Deneme',
+    path: '/coin-actions/trade-future-volume',
+    name: 'FutureVolume',
     component: InstaTradeVolume,
     meta: { requiresAuth: false }
   }

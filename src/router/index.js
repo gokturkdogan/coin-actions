@@ -4,6 +4,7 @@ import Coins from '@/layout/List.vue'
 import Detail from '@/layout/Detail.vue'
 import TradeVolume from '@/layout/TradeVolume.vue'
 import InstaTradeVolume from '@/layout/InstaTradeVolume.vue'
+import InstaTradeVolumeSpot from '@/layout/InstaTradeVolumeSpot.vue'
 
 const routes = [
   {
@@ -35,6 +36,12 @@ const routes = [
     path: '/coin-actions/trade-future-volume',
     name: 'FutureVolume',
     component: InstaTradeVolume,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/coin-actions/trade-spot-volume',
+    name: 'SpotVolume',
+    component: InstaTradeVolumeSpot,
     meta: { requiresAuth: false }
   }
 ]

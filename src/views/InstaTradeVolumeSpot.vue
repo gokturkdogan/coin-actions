@@ -2,14 +2,14 @@
   <div class="volume">
     <img class="volume__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="volume__content">
-      <ListFuture v-if="volumesFuture"/>
+      <List v-if="volumes"/>
     </div>
     <img class="volume__divider" src="../assets/images/backgorunds/divider.svg" alt="">
   </div>
 </template>
 
 <script>
-import ListFuture from '../components/InstaTradeVolume/ListFuture.vue';
+import List from '../components/InstaTradeVolume/List.vue';
 
 export default {
   name: "volume",
@@ -17,17 +17,17 @@ export default {
     return {}
   },
   components: {
-    ListFuture
+    List
   },
   created() {
-    this.$store.dispatch('instaFutureTradeVolume/startAggTradeSocket');
+    this.$store.dispatch('instaTradeVolume/startAggTradeSocket');
   },
   beforeUnmount() {
-    this.$store.dispatch('instaFutureTradeVolume/stopAggTradeSocket');
+    this.$store.dispatch('instaTradeVolume/stopAggTradeSocket');
   },
   computed: {
-    volumesFuture() {
-      return this.$store.getters['instaFutureTradeVolume/getCoinData']
+    volumes() {
+      return this.$store.getters['instaTradeVolume/getCoinData']
     }
   }
 };

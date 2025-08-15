@@ -1,5 +1,6 @@
 <template>
   <div class="volume">
+    <TheMobileHeader :current-route="currentRoute"/>
     <TheHeader :current-route="currentRoute"/>
     <InstaTradeVolume />
     <TheFooter />
@@ -10,6 +11,7 @@
 import TheHeader from '../components/Base/TheHeader.vue'
 import InstaTradeVolume from '../views/InstaTradeVolume.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
+import TheMobileHeader from '../components/Base/MobileHeader.vue'
 export default {
   name: "spot-layout",
   data() {
@@ -18,7 +20,8 @@ export default {
   components: {
     TheHeader,
     InstaTradeVolume,
-    TheFooter
+    TheFooter,
+    TheMobileHeader
   },
   created() { },
   methods: {},

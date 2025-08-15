@@ -3,7 +3,7 @@
     <img class="home__divider" src="../assets/images/backgorunds/divider.svg" alt="">
     <div class="home__section">
       <Banner />
-      <List/>
+      <List />
     </div>
     <img class="home__divider" src="../assets/images/backgorunds/divider.svg" alt="">
   </div>
@@ -42,21 +42,29 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-  .home {
-    &__section {
-      background-image: url('../assets/images/backgorunds/home-banner.svg');
-      padding: 0 300px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+.home {
+  &__section {
+    background-image: url('../assets/images/backgorunds/home-banner.svg');
+    padding: 0 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    &__spinner {
-      margin-top: 50px;
+    @media (max-width: 768px) {
+      padding: 0 20px;
+    }
+  }
+
+  &__spinner {
+    margin-top: 50px;
     }
 
     &__divider {
       width: 100%;
+
+      @media (max-width: 768px) {
+        margin: 50px 0;
+      }
     }
   }
 </style>

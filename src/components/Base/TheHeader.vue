@@ -1,15 +1,20 @@
 <template>
-  <div class="header" :class="{'-scrolled': isScrolled }">
+  <div class="header" :class="{ '-scrolled': isScrolled }">
     <div class="header__container">
       <HeaderLogo />
-        <div class="header__nav">
-          <router-link to="/coin-actions/" class="header__link" :class="{ '-active': currentRoute === 'Home' }">ANASAYFA</router-link>
-          <router-link to="/coin-actions/coin-list" class="header__link" :class="{ '-active': currentRoute === 'Coins' }">COİN LİSTESİ</router-link>
-          <router-link to="/coin-actions/trade-volume" class="header__link" :class="{ '-active': currentRoute === 'TradeVolume' }">TRADE HACİM</router-link>
-          <router-link to="/coin-actions/trade-future-volume" class="header__link" :class="{ '-active': currentRoute === 'FutureVolume' }">30DK VADELİ</router-link>
-          <router-link to="/coin-actions/trade-spot-volume" class="header__link" :class="{ '-active': currentRoute === 'SpotVolume' }">30DK SPOT</router-link>
-        </div>
-        <!-- <router-link to="/login" class="header__button">Giriş Yap</router-link> -->
+      <div class="header__nav">
+        <router-link to="/coin-actions/" class="header__link"
+          :class="{ '-active': currentRoute === 'Home' }">ANASAYFA</router-link>
+        <router-link to="/coin-actions/coin-list" class="header__link"
+          :class="{ '-active': currentRoute === 'Coins' }">COİN LİSTESİ</router-link>
+        <router-link to="/coin-actions/trade-volume" class="header__link"
+          :class="{ '-active': currentRoute === 'TradeVolume' }">TRADE HACİM</router-link>
+        <router-link to="/coin-actions/trade-future-volume" class="header__link"
+          :class="{ '-active': currentRoute === 'FutureVolume' }">30DK VADELİ</router-link>
+        <router-link to="/coin-actions/trade-spot-volume" class="header__link"
+          :class="{ '-active': currentRoute === 'SpotVolume' }">30DK SPOT</router-link>
+      </div>
+      <!-- <router-link to="/login" class="header__button">Giriş Yap</router-link> -->
     </div>
   </div>
 </template>
@@ -58,6 +63,10 @@ export default {
   transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
   -webkit-transition: background-color 0.3s ease, -webkit-backdrop-filter 0.3s ease;
 
+  @media (max-width: 768px) {
+    display: none;
+  }
+
   &.-scrolled {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -99,7 +108,7 @@ export default {
       text-decoration: underline;
     }
   }
-  
+
   &__button {
     font-size: 16px;
     padding: 14px 26px;

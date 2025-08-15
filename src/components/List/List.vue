@@ -7,7 +7,7 @@
         <Search />
       </div>
       <div class="list__tooltip">
-        <InfoIcon class="list__tooltipIcon"/>
+        <InfoIcon class="list__tooltipIcon" />
         <span class="list__tooltipContent">
           Lütfen detayını görmek istediğiniz coine tıklayınız
         </span>
@@ -34,15 +34,19 @@
       <thead>
         <tr>
           <th class="list__name">Coin</th>
-          <th class="list__name" :class="{ '-active': sortField === 'lastPrice' }">Fiyat</th>
+          <th class="list__name" @click="setSort('lastPrice')" :class="{ '-active': sortField === 'lastPrice' }">Fiyat
+          </th>
           <th class="list__name">En İyi Alış</th>
           <th class="list__name">En İyi Satış</th>
           <th class="list__name">En Yüksek Fiyat</th>
           <th class="list__price">En Düşük Fiyat</th>
-          <th class="list__change" :class="{ '-active': sortField === 'quoteVolume' }">İşlem Hacmi 24s (Spot)</th>
-          <th class="list__change" :class="{ '-active': sortField === 'quoteFutureVolume' }">İşlem Hacmi 24s (Vadeli)
+          <th class="list__change" @click="setSort('quoteVolume')" :class="{ '-active': sortField === 'quoteVolume' }">
+            İşlem Hacmi 24s (Spot)</th>
+          <th class="list__change" @click="setSort('quoteFutureVolume')"
+            :class="{ '-active': sortField === 'quoteFutureVolume' }">İşlem Hacmi 24s (Vadeli)
           </th>
-          <th class="list__change" :class="{ '-active': sortField === 'priceChangePercent' }">Değişim %</th>
+          <th class="list__change" @click="setSort('priceChangePercent')"
+            :class="{ '-active': sortField === 'priceChangePercent' }">Değişim %</th>
         </tr>
       </thead>
       <tbody>
@@ -56,37 +60,37 @@
                 class="list__link">{{ symbolFormatter(coin.symbol) }}</router-link></td>
             <td class="list__name" :class="{ '-active': sortField === 'lastPrice' }">
               <span class="list__symbol">
-                <DollarIcon />{{ formatDecimal(coin.lastPrice) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.lastPrice) }}
               </span>
             </td>
             <td class="list__name">
               <span class="list__symbol">
-                <DollarIcon />{{ formatDecimal(coin.bestBidPrice) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.bestBidPrice) }}
               </span>
             </td>
             <td class="list__name">
               <span class="list__symbol">
-                <DollarIcon />{{ formatDecimal(coin.bestAskPrice) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.bestAskPrice) }}
               </span>
             </td>
             <td class="list__price">
               <span class="list__symbol">
-                <DollarIcon />{{ formatDecimal(coin.highPrice) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.highPrice) }}
               </span>
             </td>
             <td class="list__price">
               <span class="list__currency">
-                <DollarIcon />{{ formatDecimal(coin.lowPrice) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.lowPrice) }}
               </span>
             </td>
             <td class="list__price" :class="{ '-active': sortField === 'quoteVolume' }">
               <span class="list__currency">
-                <DollarIcon />{{ formatDecimal(coin.quoteVolume) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.quoteVolume) }}
               </span>
             </td>
             <td class="list__price" :class="{ '-active': sortField === 'quoteFutureVolume' }">
               <span class="list__currency">
-                <DollarIcon />{{ formatDecimal(coin.quoteFutureVolume) }}
+                <DollarIcon class="list__dolar" />{{ formatDecimal(coin.quoteFutureVolume) }}
               </span>
             </td>
             <td class="list__change" :class="{ '-active': sortField === 'priceChangePercent' }">
@@ -224,10 +228,18 @@ export default {
   position: relative;
   box-shadow: 0 0 26px -5px #FF3BD4;
 
+  @media (max-width: 768px) {
+    max-height: 600px;
+  }
+
   &__header {
     display: flex;
     justify-content: center;
     position: relative;
+
+    @media (max-width: 768px) {
+      padding: 20px;
+    }
   }
 
   &__input {
@@ -276,6 +288,12 @@ export default {
     position: relative;
     padding: 0 20px;
 
+    @media (max-width: 768px) {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+    }
+
     &::before {
       top: 5px;
       content: "";
@@ -301,6 +319,12 @@ export default {
     }
   }
 
+  &__dolar {
+    @media (max-width: 768px) {
+      width: 8px;
+    }
+  }
+
   &__tooltip {
     position: absolute;
     color: #b9b9b9;
@@ -309,6 +333,10 @@ export default {
     left: 230px;
     display: flex;
     align-items: center;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &__tooltipIcon {
@@ -322,6 +350,10 @@ export default {
     right: 0;
     transform: translateY(-50%);
     top: 50%;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &__tab {
@@ -376,6 +408,10 @@ export default {
     margin-bottom: 50px;
     font-size: 14px;
 
+    @media (max-width: 768px) {
+      font-size: 8px;
+    }
+
     th,
     td {
       padding: 20px 10px;
@@ -423,6 +459,11 @@ export default {
   &__name {
     width: 270px;
     text-align: left;
+
+    @media (max-width: 768px) {
+      width: 50px;
+    }
+
   }
 
   &__symbol {

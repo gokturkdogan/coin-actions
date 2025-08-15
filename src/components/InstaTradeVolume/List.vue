@@ -17,15 +17,20 @@
                 <tr>
                     <th class="list__name">#</th>
                     <th class="list__name">Coin</th>
-                    <th class="list__name" :class="{ '-active': activeOrder === 'volume' }" @click="changeOrder('volume')">Hacim<span class="list__tooltip">30 Dk'lık
+                    <th class="list__name" :class="{ '-active': activeOrder === 'volume' }"
+                        @click="changeOrder('volume')">Hacim<span class="list__tooltip">30 Dk'lık
                             Toplam Hacim</span></th>
-                    <th class="list__name" :class="{ '-active': activeOrder === 'buy' }" @click="changeOrder('buy')">Alış<span class="list__tooltip">30 Dk'lık Alış
+                    <th class="list__name" :class="{ '-active': activeOrder === 'buy' }" @click="changeOrder('buy')">
+                        Alış<span class="list__tooltip">30 Dk'lık Alış
                             Hacim</span></th>
-                    <th class="list__name" :class="{ '-active': activeOrder === 'sell' }" @click="changeOrder('sell')">Satış<span class="list__tooltip">30 Dk'lık Satış
+                    <th class="list__name" :class="{ '-active': activeOrder === 'sell' }" @click="changeOrder('sell')">
+                        Satış<span class="list__tooltip">30 Dk'lık Satış
                             Hacim</span></th>
-                    <th class="list__name" :class="{ '-active': activeOrder === 'buyPercent' }" @click="changeOrder('buyPercent')">Alış %<span class="list__tooltip">30
+                    <th class="list__name" :class="{ '-active': activeOrder === 'buyPercent' }"
+                        @click="changeOrder('buyPercent')">Alış %<span class="list__tooltip">30
                             Dk'lık Alış Yüzdelik Hacim</span></th>
-                    <th class="list__name" :class="{ '-active': activeOrder === 'sellPercent' }" @click="changeOrder('sellPercent')">Satış %<span class="list__tooltip">30
+                    <th class="list__name" :class="{ '-active': activeOrder === 'sellPercent' }"
+                        @click="changeOrder('sellPercent')">Satış %<span class="list__tooltip">30
                             Dk'lık Satış Yüzdelik Hacim</span></th>
                 </tr>
             </thead>
@@ -178,6 +183,12 @@ export default {
     position: relative;
     box-shadow: 0 0 26px -5px #FF3BD4;
 
+    @media (max-width: 768px) {
+        width: 95%;
+        max-height: 600px;
+        overflow: scroll;
+    }
+
     &__header {
         display: flex;
         justify-content: center;
@@ -199,6 +210,10 @@ export default {
         display: flex;
         align-items: center;
         transition: 0.5;
+
+        @media (max-width: 768px) {
+            display: none;
+        }
 
         &.-focused {
             border-color: #FF3BD4;
@@ -275,6 +290,10 @@ export default {
         left: 250px;
         position: absolute;
 
+        @media (max-width: 768px) {
+            display: none;
+        }
+
         &:hover {
             border-color: #FF3BD4;
             box-shadow: 0 0 26px -5px #FF3BD4;
@@ -295,8 +314,16 @@ export default {
         margin-bottom: 50px;
         font-size: 14px;
 
+        @media (max-width: 768px) {
+            font-size: 8px;
+        }
+
         thead {
             font-size: 14px;
+
+            @media (max-width: 768px) {
+                font-size: 8px;
+            }
 
             th {
                 cursor: pointer;
@@ -317,6 +344,10 @@ export default {
             padding: 20px;
             border: none;
             outline: none;
+
+            @media (max-width: 768px) {
+                padding: 20px 10px;
+            }
 
             &.-active {
                 box-shadow: 0 0 26px -5px #FF3BD4;
@@ -354,6 +385,10 @@ export default {
         min-width: 200px;
         text-align: left;
         position: relative;
+
+        @media (max-width: 768px) {
+            min-width: unset;
+        }
     }
 
     &__tooltip {
@@ -392,6 +427,13 @@ export default {
         border-radius: 8px;
         width: fit-content;
         height: 30px;
+
+        @media (max-width: 768px) {
+            height: 20px;
+            border-radius: 5px;
+            padding: 0;
+            width: 50px;
+        }
 
         &.-up {
             background: rgba(52, 179, 73, 0.1);

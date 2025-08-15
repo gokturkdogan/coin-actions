@@ -15,7 +15,7 @@ export default {
         return {}
     },
     components: {},
-    created() {},
+    created() { },
     methods: {},
 };
 </script>
@@ -29,6 +29,10 @@ export default {
         color: #CCCEEF;
         font-size: 60px;
         font-weight: 700;
+
+        @media (max-width: 768px) {
+            font-size: 20px;
+        }
     }
 
     &__buttons {
@@ -55,6 +59,10 @@ export default {
         -webkit-box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
         -moz-box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
         box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
+
+        @media (max-width: 768px) {
+            font-size: 12px;
+        }
 
         &::after {
             content: "";

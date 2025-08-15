@@ -1,5 +1,6 @@
 <template>
   <div class="detail">
+    <TheMobileHeader :current-route="currentRoute"/>
     <TheHeader :current-route="currentRoute"/>
     <Detail v-if="symbol" :symbol="symbol"/>
     <TheFooter />
@@ -10,6 +11,7 @@
 import TheHeader from '../components/Base/TheHeader.vue'
 import Detail from '../views/Detail.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
+import TheMobileHeader from '../components/Base/MobileHeader.vue'
 export default {
   name: "detail-layout",
   data() {
@@ -18,7 +20,8 @@ export default {
   components: {
     TheHeader,
     Detail,
-    TheFooter
+    TheFooter,
+    TheMobileHeader
   },
   props: {
     symbol: {

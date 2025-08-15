@@ -1,5 +1,6 @@
 <template>
   <div class="main">
+    <TheMobileHeader :current-route="currentRoute"/>
     <TheHeader :current-route="currentRoute"/>
     <List />
     <TheFooter />
@@ -10,6 +11,7 @@
 import TheHeader from '../components/Base/TheHeader.vue'
 import List from '../views/List.vue'
 import TheFooter from '../components/Base/TheFooter.vue'
+import TheMobileHeader from '../components/Base/MobileHeader.vue'
 export default {
   name: "main-list",
   data() {
@@ -18,7 +20,8 @@ export default {
   components: {
     TheHeader,
     List,
-    TheFooter
+    TheFooter,
+    TheMobileHeader
   },
   methods: {},
   computed: {

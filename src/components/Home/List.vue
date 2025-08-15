@@ -21,14 +21,14 @@
                     </td>
                     <td class="list__price">
                         <span class="list__currency">
-                            <DollarIcon />{{ formatDecimal(coin.price) }}
+                            <DollarIcon class="list__dolar" />{{ formatDecimal(coin.price) }}
                         </span>
                     </td>
                     <td class="list__change">
                         <span class="list__span">
                             <span class="list__colored" :class="{ '-up': coin.change > 0, '-down': coin.change < 0 }">
-                                <ArrowUp v-if="coin.change > 0" />
-                                <ArrowDown v-else />
+                                <ArrowUp class="list__icon" v-if="coin.change > 0" />
+                                <ArrowDown class="list__icon" v-else />
                                 {{ percentFormatter(coin.change) }} %
                             </span>
                         </span>
@@ -120,6 +120,10 @@ export default {
         position: relative;
         padding: 0 20px;
 
+        @media (max-width: 768px) {
+            font-size: 12px;
+        }
+
         &::before {
             top: 5px;
             content: "";
@@ -154,11 +158,19 @@ export default {
         border: 1px solid rgba(47, 51, 109, 0.6);
         margin-bottom: 50px;
 
+        @media (max-width: 768px) {
+            font-size: 10px;
+        }
+
         th,
         td {
             padding: 20px 40px;
             border: none;
             outline: none;
+
+            @media (max-width: 768px) {
+                padding: 10px 20px;
+            }
         }
 
         tbody {
@@ -190,11 +202,26 @@ export default {
     &__number {
         width: 44px;
         text-align: left;
+
+        @media (max-width: 768px) {
+            width: 20px;
+        }
     }
 
     &__name {
         width: 270px;
         text-align: left;
+
+        @media (max-width: 768px) {
+            width: 100px;
+        }
+    }
+
+    &__dolar {
+        @media (max-width: 768px) {
+            width: 8px;
+            margin-right: 2px;
+        }
     }
 
     &__symbol {
@@ -210,6 +237,10 @@ export default {
     &__img {
         width: 20px;
         margin-right: 10px;
+
+        @media (max-width: 768px) {
+            width: 10px;
+        }
     }
 
     &__price {
@@ -220,6 +251,12 @@ export default {
     &__change {
         width: 100px;
         text-align: right;
+    }
+
+    &__icon {
+        @media (max-width: 768px) {
+            width: 10px;
+        }
     }
 
     &__span {
@@ -247,6 +284,10 @@ export default {
             background-color: rgba(240, 41, 52, .1);
             color: #ff4d4d;
         }
+
+        @media (max-width: 768px) {
+            height: 20px;
+        }
     }
 
     &__buttonArea {
@@ -273,6 +314,10 @@ export default {
         -moz-box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
         box-shadow: inset 0px 0px 0.5em 0px #FF3BD4, 0px 0px 0.5em 0px #FF3BD4;
 
+        @media (max-width: 768px) {
+            font-size: 12px;
+        }
+
         &::after {
             content: "";
             position: absolute;
@@ -283,8 +328,7 @@ export default {
             opacity: 0;
             z-index: -1;
             background-color: #FF3BD4;
-            box-shadow: 0 0 2em 0.2em #FF3BD4;
-            transition: opacity 100ms linear;
+            box-shadow: 0 0 2em 0.2em #FF3BD4;            transition: opacity 100ms linear;
         }
 
         &:hover {

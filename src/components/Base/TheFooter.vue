@@ -46,12 +46,21 @@ export default {
     flex-direction: column;
     justify-content: center;
 
+    @media (max-width: 768px) {
+        padding: 0;
+    }
+
     &__informations {
         display: flex;
         gap: 0;
         border-top: 1px solid #2F336D;
         border-bottom: 1px solid #2F336D;
         padding: 0 40px;
+
+        @media (max-width: 768px) {
+            border: 0;
+            flex-direction: column;
+        }
     }
 
     &__socials {
@@ -124,6 +133,10 @@ export default {
         border-left: 1px solid #2F336D;
         border-right: 1px solid #2F336D;
         padding: 40px;
+
+        @media (max-width: 768px) {
+            border: 0;
+        }
     }
 
     &__text {
@@ -189,6 +202,10 @@ export default {
         color: #7064E9;
         font-size: 16px;
         margin-top: 40px;
+
+        @media (max-width: 768px) {
+            padding-bottom: 30px;
+        }
     }
 }
 </style>

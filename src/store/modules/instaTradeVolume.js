@@ -69,7 +69,17 @@ const COINS = [
   "FUNUSDT",
   "TREEUSDT",
   "MEMEUSDT",
-  "TONUSDT"
+  "TONUSDT",
+  "SKLUSDT",
+  "OGUSDT",
+  "RAYUSDT",
+  "GTCUSDT",
+  "BIOUSDT",
+  "CYBERUSTD",
+  "CFXUSDT",
+  "ASRUSDT",
+  "EIGENUSDT",
+  "SCRUSDT"
 ];
 
 const state = () => ({

@@ -122,10 +122,13 @@ export default {
     computed: {
         volumes() {
             const data = this.$store.getters['tradeVolume/getCoinData'] || [];
-
-            return [...data].sort((a, b) => {
-                const getSafe = (v) => v || 0;
-
+            const filtered = !this.searchText
+                ? data
+                : data.filter(coin =>
+                    coin.symbol?.toLowerCase().includes(this.searchText.toLowerCase())
+                );
+            return [...filtered].sort((a, b) => {
+                const getSafe = (v) => Number(v) || 0;
                 const aVolume = getSafe(a.volume30m) + getSafe(a.liveBuy) + getSafe(a.liveSell);
                 const bVolume = getSafe(b.volume30m) + getSafe(b.liveBuy) + getSafe(b.liveSell);
 

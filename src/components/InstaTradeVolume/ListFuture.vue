@@ -10,7 +10,7 @@
                 <ArrowUp2 v-if="destination === 'up'" @click="changeDestination('down')" />
                 <ArrowDown2 v-else @click="changeDestination('up')" />
             </div>
-            <h2 class="list__title">ALIŞ SATIŞ HACİM VADELİ (30dk)</h2>
+            <h2 class="list__title">VADELİ (30dk)</h2>
         </div>
         <table class="list__table">
             <thead>
@@ -190,6 +190,10 @@ export default {
         display: flex;
         justify-content: center;
         position: relative;
+
+        @media (max-width: 768px) {
+            padding: 20px;
+        }
     }
 
     &__input {
@@ -207,10 +211,6 @@ export default {
         display: flex;
         align-items: center;
         transition: 0.5;
-
-        @media (max-width: 768px) {
-            display: none;
-        }
 
         &.-focused {
             border-color: #FF3BD4;
@@ -241,6 +241,12 @@ export default {
         text-align: center;
         position: relative;
         padding: 0 20px;
+
+        @media (max-width: 768px) {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
 
         &::before {
             top: 5px;
